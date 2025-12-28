@@ -33,23 +33,21 @@ function isToday(d){
   return key(d) === todayKey();
 }
 
-function isPast(d){
-  return key(d) < todayKey(); // YYYY-MM-DD 문자열 비교 가능
-}
-
 function renderHome(){
   $("#todayLabel").textContent = fmt(viewDate);
 
   const data = load();
   const rec = data[key(viewDate)] || [];
 
-  $("#doneBtn").style.opacity = rec.length ? "1" : "0.7";
+  // ✅ 부위 1개라도 있으면 "운동 완료" 상태(버튼 진하게)
+  $("#doneBtn").style.opacity = rec.length ? "1" : "0.35";
 
+  // ✅ 선택 표시
   $$(".muscle").forEach(b=>{
     b.classList.toggle("selected", rec.includes(b.textContent));
   });
 
-  // 미래 이동 금지: viewDate가 오늘이면 next 비활성
+  // ✅ 미래 이동 금지: viewDate가 오늘이면 next 비활성
   const next = $("#nextDay");
   if(isToday(viewDate)) next.classList.add("disabled");
   else next.classList.remove("disabled");
@@ -96,12 +94,14 @@ function renderCalendar(){
     muscles.forEach(m=>{
       const s = document.createElement("div");
       s.className = "slot";
+
       if(rec.includes(m)){
         s.classList.add("filled");
-        s.textContent = m;     // ✅ 기록 화면에 텍스트로 표시
+        s.textContent = m;
       } else {
         s.textContent = "";
       }
+
       cell.appendChild(s);
     });
 
@@ -120,40 +120,31 @@ function renderExport(){
 
 /* ===== 이벤트 ===== */
 
-// 운동 완료: 해당 날짜(viewDate)의 기록 토글(있으면 삭제, 없으면 생성)
-$("#doneBtn").onclick = ()=>{
-  const d = load();
-  const k = key(viewDate);
+// ✅ 운동 완료 버튼은 "누를 필요 없음" → 눌러도 아무 일 안 하게
+$("#doneBtn").onclick = ()=>{};
 
-  // ✅ 과거/오늘 모두 토글 가능
-  d[k] ? delete d[k] : d[k] = [];
-
-  save(d);
-  renderHome();
-  renderCalendar();
-};
-
-// ✅ 부위 선택: 과거 날짜는 "운동완료" 안 눌러도 수정 가능(자동 생성)
-// 오늘 날짜는 기존대로 "운동 완료"가 먼저 있어야 선택 가능
+/**
+ * ✅ 부위 버튼:
+ * - 누르면 그날 기록이 자동 생성됨
+ * - 모두 해제되면 그날 기록 자체가 삭제됨
+ */
 $$(".muscle").forEach(b=>{
   b.onclick = ()=>{
     const d = load();
     const k = key(viewDate);
 
-    // 🔥 핵심: 과거면 자동으로 기록 생성해서 수정 가능하게
-    if(!d[k]){
-      if(isPast(viewDate)){
-        d[k] = []; // 자동으로 "운동 완료" 상태 생성
-      } else {
-        // 오늘은 기존 규칙 유지: 운동 완료 먼저 눌러야 함
-        return;
-      }
-    }
+    if(!d[k]) d[k] = []; // ✅ 자동 생성(운동 완료)
 
     const m = b.textContent;
-    d[k].includes(m)
-      ? d[k] = d[k].filter(x=>x!==m)
-      : d[k].push(m);
+
+    if(d[k].includes(m)){
+      d[k] = d[k].filter(x=>x!==m);
+    } else {
+      d[k].push(m);
+    }
+
+    // ✅ 아무 부위도 없으면 기록 삭제(=운동 안 함)
+    if(d[k].length === 0) delete d[k];
 
     save(d);
     renderHome();
