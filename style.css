@@ -4,12 +4,17 @@
   --muted:#8a8f98;
   --line:#e6e7eb;
   --soft:#f3f4f6;
-  --maxw: 480px;
 
-  /* 달력 슬롯 자동 최적화 */
-  --cell-minh: 138px;
-  --slot-h: 20px;
-  --slot-fs: 11px;
+  /* ✅ 아이폰 화면 자동 최적화 */
+  --maxw: 520px;
+  --gap: clamp(8px, 2.0vw, 12px);
+
+  /* 기록 칸/슬롯 */
+  --cell-r: 18px;
+  --cell-pad: clamp(8px, 1.8vw, 10px);
+  --cell-minh: clamp(110px, 15vh, 155px);
+  --slot-h: clamp(14px, 2.2vh, 20px);
+  --slot-fs: clamp(9px, 1.9vw, 11px);
 }
 
 :root{
@@ -41,15 +46,15 @@ body{
   padding-bottom: 10px;
   border-bottom: 1px solid var(--line);
 }
-
-.headerLeft{
+.headerInner{
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 0 16px;
+  display:flex;
+  justify-content:flex-start;
 }
-
 .headerTitle{
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   letter-spacing: -0.2px;
 }
@@ -65,28 +70,29 @@ body{
 .tab{ display:none; }
 .tab.is-active{ display:block; }
 
+/* ===== 홈 ===== */
 .homeTop{
   display:flex;
   align-items:center;
   justify-content:center;
   gap: 14px;
-  margin-bottom: 18px;
+  margin: 10px 0 18px;
 }
 
 .date{
   min-width: 96px;
   text-align:center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
 }
 
 .iconBtn{
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border:1px solid var(--line);
   background:#fff;
-  border-radius: 14px;
-  font-size: 18px;
+  border-radius: 16px;
+  font-size: 20px;
   font-weight: 900;
   cursor:pointer;
 }
@@ -98,7 +104,7 @@ body{
   height: 92px;
   border: 2px solid #111;
   background:#fff;
-  border-radius: 16px;
+  border-radius: 20px;
   font-size: 20px;
   font-weight: 900;
   cursor:pointer;
@@ -109,32 +115,42 @@ body{
   color:#fff;
 }
 
-/* 홈 부위 버튼 3열 */
+/* ✅ 홈 부위 버튼 3열 + 더 예쁜 비율 */
 .grid3{
   display:grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: var(--gap);
+  margin-bottom: 10px;
 }
 
 .partBtn{
-  height: 70px;
+  height: 72px;
   border: 2px solid #111;
   background:#fff;
-  border-radius: 16px;
+  border-radius: 18px;
   font-size: 15px;
   font-weight: 900;
   cursor:pointer;
+  transition: transform .06s ease;
+}
+.partBtn:active{ transform: translateY(1px); }
+
+/* ✅ 1번 해결: 선택된 부위 = 검정 바탕 + 흰 글씨 */
+.partBtn.is-selected{
+  background:#111;
+  color:#fff;
+  border-color:#111;
 }
 
-.partBtn.is-selected{ background: var(--soft); }
+/* 운동 완료 전엔 비활성 */
 .partBtn.is-disabled{
-  border-color:#c9ccd3;
-  color:#c9ccd3;
+  border-color:#d2d5dc;
+  color:#d2d5dc;
+  background:#fff;
   cursor:not-allowed;
 }
 
-/* ✅ 홈 하단: 마지막 운동(작은 글씨) */
+/* 마지막 운동 표시 */
 .last-trained{
   margin-top: 6px;
   font-size: 11px;
@@ -145,24 +161,14 @@ body{
   gap: 8px 12px;
   justify-content: center;
 }
-.last-trained .item{
-  white-space: nowrap;
-}
+.last-trained .item{ white-space: nowrap; }
 
-.hint{
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-  text-align:center;
-  margin-top: 8px;
-}
-
-/* 기록 */
+/* ===== 기록 ===== */
 .weekdays{
   display:grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: var(--gap);
+  margin: 10px 0 10px;
   color: var(--muted);
   font-weight: 900;
   padding: 0 2px;
@@ -172,19 +178,19 @@ body{
   font-size: 12px;
 }
 
+/* ✅ 4번 해결: 화면에 맞게 촘촘 + 자동 크기 */
 .calendar{
   display:grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  gap: var(--gap);
 }
 
-/* 달력 칸/슬롯 자동 최적화 */
 .cell{
   min-height: var(--cell-minh);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--cell-r);
   background:#fff;
-  padding: 10px;
+  padding: var(--cell-pad);
   display:flex;
   flex-direction:column;
   gap: 8px;
@@ -209,54 +215,40 @@ body{
 .slots{
   display:flex;
   flex-direction:column;
-  gap: 5px;
+  gap: clamp(3px, .8vh, 5px);
 }
 
 .slot{
   height: var(--slot-h);
   border: 1px solid #111;
-  border-radius: 10px;
+  border-radius: 999px; /* 더 부드럽게 */
   display:flex;
   align-items:center;
   justify-content:center;
   font-size: var(--slot-fs);
   font-weight: 900;
   line-height: 1;
-  padding: 0 2px;
+  padding: 0 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .slot.empty{ color: transparent; }
 
-/* 작은 화면(아이폰 SE 등) */
-@media (max-width: 390px){
-  :root{
-    --cell-minh: 126px;
-    --slot-h: 18px;
-    --slot-fs: 10px;
-  }
-  .calendar{ gap: 8px; }
-  .weekdays{ gap: 8px; }
-  .cell{ padding: 9px; }
-  .slots{ gap: 4px; }
+/* ===== 내보내기 ===== */
+.hint{
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align:center;
+  margin-top: 8px;
 }
 
-/* 큰 화면(프로 맥스 등) */
-@media (min-width: 430px){
-  :root{
-    --cell-minh: 150px;
-    --slot-h: 21px;
-    --slot-fs: 11px;
-  }
-}
-
-/* 내보내기 */
 .exportBox{
   width: 100%;
-  height: 220px;
+  height: 240px;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 12px;
   font-size: 13px;
   background:#fff;
@@ -264,7 +256,7 @@ body{
   resize: vertical;
 }
 
-/* 하단 탭바 */
+/* ===== 하단 탭바 ===== */
 .tabbar{
   position: fixed;
   left: 0;
