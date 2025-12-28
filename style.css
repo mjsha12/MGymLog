@@ -1,284 +1,156 @@
-:root{
-  --bg:#ffffff;
-  --text:#111111;
-  --muted:#8a8f98;
-  --line:#e6e7eb;
-  --soft:#f3f4f6;
-
-  /* ✅ 아이폰 화면 자동 최적화 */
-  --maxw: 520px;
-  --gap: clamp(8px, 2.0vw, 12px);
-
-  /* 기록 칸/슬롯 */
-  --cell-r: 18px;
-  --cell-pad: clamp(8px, 1.8vw, 10px);
-  --cell-minh: clamp(110px, 15vh, 155px);
-  --slot-h: clamp(14px, 2.2vh, 20px);
-  --slot-fs: clamp(9px, 1.9vw, 11px);
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
 }
 
-:root{
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
+body {
+  margin: 0;
+  background: #fff;
+  color: #111;
 }
 
-*{ box-sizing:border-box; }
-html, body{ height:100%; }
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", Segoe UI, Roboto, Arial, sans-serif;
+.topbar {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
 }
 
-.app{
-  min-height:100%;
-  display:flex;
-  flex-direction:column;
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
 }
 
-.header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:var(--bg);
-  padding-top: calc(10px + var(--safe-top));
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
-}
-.headerInner{
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 0 16px;
-  display:flex;
-  justify-content:flex-start;
-}
-.headerTitle{
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.2px;
+.tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #aaa;
 }
 
-.content{
-  flex:1;
-  max-width: var(--maxw);
-  margin: 0 auto;
-  width: 100%;
-  padding: 18px 16px calc(16px + 74px + var(--safe-bottom));
+.tab.active {
+  color: #000;
+  font-weight: 600;
 }
 
-.tab{ display:none; }
-.tab.is-active{ display:block; }
-
-/* ===== 홈 ===== */
-.homeTop{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 14px;
-  margin: 10px 0 18px;
+.page {
+  display: none;
+  padding: 16px;
 }
 
-.date{
-  min-width: 96px;
-  text-align:center;
-  font-size: 20px;
-  font-weight: 900;
+.page.active {
+  display: block;
 }
 
-.iconBtn{
-  width: 48px;
-  height: 48px;
-  border:1px solid var(--line);
-  background:#fff;
-  border-radius: 16px;
-  font-size: 20px;
-  font-weight: 900;
-  cursor:pointer;
-}
-.iconBtn:active{ transform: translateY(1px); }
-.iconBtn:disabled{ opacity:.25; cursor:not-allowed; }
-
-.primaryBtn{
-  width: 100%;
-  height: 92px;
-  border: 2px solid #111;
-  background:#fff;
-  border-radius: 20px;
-  font-size: 20px;
-  font-weight: 900;
-  cursor:pointer;
+/* 홈 */
+.date-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 16px;
 }
-.primaryBtn.is-on{
-  background:#111;
-  color:#fff;
+
+.nav-btn {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
 }
 
-/* ✅ 홈 부위 버튼 3열 + 더 예쁜 비율 */
-.grid3{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--gap);
-  margin-bottom: 10px;
+.nav-btn.disabled {
+  opacity: 0.3;
 }
 
-.partBtn{
-  height: 72px;
-  border: 2px solid #111;
-  background:#fff;
-  border-radius: 18px;
-  font-size: 15px;
-  font-weight: 900;
-  cursor:pointer;
-  transition: transform .06s ease;
-}
-.partBtn:active{ transform: translateY(1px); }
-
-/* ✅ 1번 해결: 선택된 부위 = 검정 바탕 + 흰 글씨 */
-.partBtn.is-selected{
-  background:#111;
-  color:#fff;
-  border-color:#111;
+#todayLabel {
+  font-size: 18px;
+  font-weight: 600;
 }
 
-/* 운동 완료 전엔 비활성 */
-.partBtn.is-disabled{
-  border-color:#d2d5dc;
-  color:#d2d5dc;
-  background:#fff;
-  cursor:not-allowed;
-}
-
-/* 마지막 운동 표시 */
-.last-trained{
-  margin-top: 6px;
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.6;
-  display:flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-  justify-content: center;
-}
-.last-trained .item{ white-space: nowrap; }
-
-/* ===== 기록 ===== */
-.weekdays{
-  display:grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--gap);
-  margin: 10px 0 10px;
-  color: var(--muted);
-  font-weight: 900;
-  padding: 0 2px;
-}
-.weekdays > div{
-  text-align:center;
-  font-size: 12px;
-}
-
-/* ✅ 4번 해결: 화면에 맞게 촘촘 + 자동 크기 */
-.calendar{
-  display:grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--gap);
-}
-
-.cell{
-  min-height: var(--cell-minh);
-  border: 1px solid var(--line);
-  border-radius: var(--cell-r);
-  background:#fff;
-  padding: var(--cell-pad);
-  display:flex;
-  flex-direction:column;
-  gap: 8px;
-}
-
-.cellHeader{
-  font-size: 12px;
-  font-weight: 900;
-  color:#111;
-  line-height: 1.1;
-}
-
-.cell.today{
-  outline: 3px solid #111;
-  outline-offset: -3px;
-}
-.cell.selected{
-  outline: 3px solid #c9ccd3;
-  outline-offset: -3px;
-}
-
-.slots{
-  display:flex;
-  flex-direction:column;
-  gap: clamp(3px, .8vh, 5px);
-}
-
-.slot{
-  height: var(--slot-h);
-  border: 1px solid #111;
-  border-radius: 999px; /* 더 부드럽게 */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size: var(--slot-fs);
-  font-weight: 900;
-  line-height: 1;
-  padding: 0 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.slot.empty{ color: transparent; }
-
-/* ===== 내보내기 ===== */
-.hint{
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-  text-align:center;
-  margin-top: 8px;
-}
-
-.exportBox{
+.done-btn {
   width: 100%;
-  height: 240px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
+  padding: 16px;
+  background: #000;
+  color: #fff;
+  border-radius: 16px;
+  font-size: 18px;
+  border: none;
+  margin-bottom: 20px;
+}
+
+.muscle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.muscle {
+  padding: 14px 0;
+  border-radius: 14px;
+  border: 2px solid #000;
+  background: #fff;
+  font-weight: 600;
+}
+
+.muscle.selected {
+  background: #000;
+  color: #fff;
+}
+
+.last-info {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* 기록 */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 6px;
+  min-height: 110px;
+}
+
+.day h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.slot {
+  height: 14px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  margin-bottom: 3px;
+}
+
+/* 내보내기 */
+.copy-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: 2px solid #000;
+  background: #fff;
+  font-size: 16px;
+}
+
+pre {
+  margin-top: 12px;
+  background: #f7f7f7;
   padding: 12px;
+  border-radius: 10px;
   font-size: 13px;
-  background:#fff;
-  margin-top: 10px;
-  resize: vertical;
 }
-
-/* ===== 하단 탭바 ===== */
-.tabbar{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding-bottom: var(--safe-bottom);
-  background: rgba(255,255,255,0.92);
-  border-top: 1px solid var(--line);
-  backdrop-filter: blur(10px);
-  display:flex;
-  justify-content:space-around;
-  gap: 8px;
-  padding-top: 10px;
-}
-
-.tabbtn{
-  border:none;
-  background:transparent;
-  font-size: 13px;
-  font-weight: 900;
-  color:#b1b4bb;
-  padding: 10px 10px 14px;
-  cursor:pointer;
-}
-.tabbtn.is-active{ color:#111; }
