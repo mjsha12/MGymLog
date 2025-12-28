@@ -23,10 +23,18 @@ function addDays(date, n){
   return d;
 }
 
+function todayKey(){
+  const t = new Date();
+  t.setHours(0,0,0,0);
+  return key(t);
+}
+
 function isToday(d){
-  const t = new Date(); t.setHours(0,0,0,0);
-  const x = new Date(d); x.setHours(0,0,0,0);
-  return key(t) === key(x);
+  return key(d) === todayKey();
+}
+
+function isPast(d){
+  return key(d) < todayKey(); // YYYY-MM-DD 문자열 비교 가능
 }
 
 function renderHome(){
@@ -35,10 +43,8 @@ function renderHome(){
   const data = load();
   const rec = data[key(viewDate)] || [];
 
-  // 기록이 있으면 버튼 좀 더 진하게 느껴지게
   $("#doneBtn").style.opacity = rec.length ? "1" : "0.7";
 
-  // 부위 선택 표시
   $$(".muscle").forEach(b=>{
     b.classList.toggle("selected", rec.includes(b.textContent));
   });
@@ -66,9 +72,7 @@ function renderHome(){
 }
 
 /**
- * ✅ 기록(14일) 규칙:
- * "오늘이 포함된 주의 전주 일요일" ~ "오늘이 포함된 주의 토요일"
- * => 전주(일~토) + 이번주(일~토) = 14일
+ * 기록(14일): 전주 일요일 ~ 이번주 토요일
  */
 function renderCalendar(){
   const cal = $("#calendar");
@@ -89,18 +93,15 @@ function renderCalendar(){
 
     const rec = load()[key(d)] || [];
 
-    // ✅ 7개 슬롯을 항상 같은 순서로 유지 + 텍스트 표시
     muscles.forEach(m=>{
       const s = document.createElement("div");
       s.className = "slot";
-
       if(rec.includes(m)){
         s.classList.add("filled");
-        s.textContent = m;   // ✅ 여기에 "등/가슴..." 표시
+        s.textContent = m;     // ✅ 기록 화면에 텍스트로 표시
       } else {
-        s.textContent = "";  // 빈칸 유지
+        s.textContent = "";
       }
-
       cell.appendChild(s);
     });
 
@@ -119,12 +120,12 @@ function renderExport(){
 
 /* ===== 이벤트 ===== */
 
-// 운동 완료: 해당 날짜(viewDate)의 기록 토글
+// 운동 완료: 해당 날짜(viewDate)의 기록 토글(있으면 삭제, 없으면 생성)
 $("#doneBtn").onclick = ()=>{
   const d = load();
   const k = key(viewDate);
 
-  // 있으면 삭제(취소), 없으면 생성(운동 완료)
+  // ✅ 과거/오늘 모두 토글 가능
   d[k] ? delete d[k] : d[k] = [];
 
   save(d);
@@ -132,12 +133,22 @@ $("#doneBtn").onclick = ()=>{
   renderCalendar();
 };
 
-// 부위 선택: 운동 완료(=해당 날짜 key 존재)된 날만 선택 가능
+// ✅ 부위 선택: 과거 날짜는 "운동완료" 안 눌러도 수정 가능(자동 생성)
+// 오늘 날짜는 기존대로 "운동 완료"가 먼저 있어야 선택 가능
 $$(".muscle").forEach(b=>{
   b.onclick = ()=>{
     const d = load();
     const k = key(viewDate);
-    if(!d[k]) return; // 운동 완료를 먼저 누르기 전이면 무시
+
+    // 🔥 핵심: 과거면 자동으로 기록 생성해서 수정 가능하게
+    if(!d[k]){
+      if(isPast(viewDate)){
+        d[k] = []; // 자동으로 "운동 완료" 상태 생성
+      } else {
+        // 오늘은 기존 규칙 유지: 운동 완료 먼저 눌러야 함
+        return;
+      }
+    }
 
     const m = b.textContent;
     d[k].includes(m)
