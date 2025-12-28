@@ -1,74 +1,70 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-
   <title>MGymLog</title>
 
-  <!-- ✅ PWA -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- ✅ iOS 홈화면 아이콘(이게 없으면 iOS가 M으로 뜨는 경우 많음) -->
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <div class="app">
-    <!-- 상단 헤더 -->
-    <header class="header">
-      <div class="headerInner">
-        <div class="headerTitle">MGymLog</div>
-      </div>
-    </header>
 
-    <!-- 콘텐츠 -->
-    <main class="content">
-      <!-- 홈 -->
-      <section class="tab is-active" id="tab-home">
-        <div class="homeTop">
-          <button class="iconBtn" id="prevDayBtn" type="button" aria-label="이전 날짜">←</button>
-          <div class="date" id="todayLabel">--.--</div>
-          <button class="iconBtn" id="nextDayBtn" type="button" aria-label="다음 날짜">→</button>
-        </div>
+<header class="topbar">
+  <h1>MGymLog</h1>
+</header>
 
-        <button class="primaryBtn" id="workoutToggle" type="button">운동 완료</button>
+<nav class="tabs">
+  <button class="tab active" data-tab="home">홈</button>
+  <button class="tab" data-tab="record">기록</button>
+  <button class="tab" data-tab="export">내보내기</button>
+</nav>
 
-        <div class="grid3" id="parts"></div>
+<main>
+  <!-- 홈 -->
+  <section id="home" class="page active">
+    <div class="date-row">
+      <button id="prevDay" class="nav-btn">←</button>
+      <div id="todayLabel"></div>
+      <button id="nextDay" class="nav-btn disabled">→</button>
+    </div>
 
-        <div class="last-trained" id="lastTrained"></div>
-      </section>
+    <button id="doneBtn" class="done-btn">운동 완료</button>
 
-      <!-- 기록 -->
-      <section class="tab" id="tab-records">
-        <div class="weekdays">
-          <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
-        </div>
-        <div class="calendar" id="calendar"></div>
-      </section>
+    <div class="muscle-grid">
+      <button class="muscle">가슴</button>
+      <button class="muscle">등</button>
+      <button class="muscle">어깨</button>
+      <button class="muscle">이두</button>
+      <button class="muscle">삼두</button>
+      <button class="muscle">코어</button>
+      <button class="muscle">하체</button>
+    </div>
 
-      <!-- 내보내기 -->
-      <section class="tab" id="tab-export">
-        <button class="primaryBtn" id="copyBtn" type="button">복사하기</button>
-        <div class="hint" id="copyStatus"></div>
-        <textarea class="exportBox" id="exportPreview" readonly
-          placeholder="복사할 내용 미리보기(자동 생성)"></textarea>
-      </section>
-    </main>
+    <div id="lastInfo" class="last-info"></div>
+  </section>
 
-    <!-- 하단 탭바 -->
-    <nav class="tabbar">
-      <button class="tabbtn is-active" data-tab="home" type="button">홈</button>
-      <button class="tabbtn" data-tab="records" type="button">기록</button>
-      <button class="tabbtn" data-tab="export" type="button">내보내기</button>
-    </nav>
-  </div>
+  <!-- 기록 -->
+  <section id="record" class="page">
+    <div class="weekdays">
+      <div>일</div><div>월</div><div>화</div><div>수</div>
+      <div>목</div><div>금</div><div>토</div>
+    </div>
+    <div id="calendar" class="calendar"></div>
+  </section>
 
-  <script src="./app.js"></script>
+  <!-- 내보내기 -->
+  <section id="export" class="page">
+    <button id="copyBtn" class="copy-btn">복사하기</button>
+    <pre id="exportText"></pre>
+  </section>
+</main>
+
+<script src="app.js"></script>
 </body>
 </html>
 
