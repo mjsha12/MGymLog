@@ -71,7 +71,7 @@ function ensureRecordExists(key){
 }
 function getViewKey(){ return ymd(viewDate); }
 
-// ===== 홈: 날짜 이동 =====
+// ===== 홈 날짜 이동 =====
 function setViewDate(newDate){
   viewDate = new Date(newDate);
   viewDate.setHours(0,0,0,0);
@@ -110,7 +110,7 @@ PARTS.forEach(p => {
     const all = loadAll();
     const rec = all[key] || { done:false, parts:{} };
 
-    // 운동 완료 전에는 아무것도 안 됨
+    // 운동 완료 전에는 선택 불가
     if (!rec.done) return;
 
     rec.parts[p] = !rec.parts[p];
@@ -137,7 +137,6 @@ function setWorkoutUI(){
   document.querySelectorAll(".partBtn").forEach(btn => {
     btn.classList.toggle("is-disabled", !rec.done);
   });
-
 }
 
 function syncHomePartsFromData(){
@@ -159,7 +158,7 @@ function toggleDone(){
 
   rec.done = !rec.done;
 
-  // 취소하면 부위도 초기화 (정책 유지)
+  // 취소하면 부위 초기화
   if (!rec.done) rec.parts = {};
 
   all[key] = rec;
@@ -173,9 +172,8 @@ function toggleDone(){
 }
 workoutToggle.addEventListener("click", toggleDone);
 
-// ===== ✅ 부위별 마지막 운동 표시 =====
+// ===== 부위별 마지막 운동 =====
 function daysDiff(a, b){
-  // a,b는 Date (00:00 기준)
   return Math.floor((a - b) / (1000*60*60*24));
 }
 
@@ -191,7 +189,7 @@ function findLastDateForPart(part){
       if (!last || d > last) last = d;
     }
   }
-  return last; // Date or null
+  return last;
 }
 
 function renderLastTrained(){
@@ -211,7 +209,7 @@ function renderLastTrained(){
     .join("");
 }
 
-// ===== 기록: 28일 달력 =====
+// ===== 기록: 28일 =====
 function renderCalendar(){
   const all = loadAll();
   const start = getStart28(realToday);
