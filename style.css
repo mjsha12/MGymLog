@@ -1,170 +1,197 @@
-* {
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+*{
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
 }
 
-body {
-  margin: 0;
-  background: #fff;
-  color: #111;
+body{
+  margin:0;
+  background:#fff;
+  color:#111;
 }
 
 /* 상단 */
-.topbar {
-  padding: 14px 16px;
-  border-bottom: 1px solid #eee;
+.topbar{
+  padding:14px 16px;
+  border-bottom:1px solid #eee;
 }
 
 /* 메인 */
-main {
-  padding: 16px;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+main{
+  padding:16px;
+  padding-bottom:calc(90px + env(safe-area-inset-bottom));
 }
 
-.page { display: none; }
-.page.active { display: block; }
+.page{ display:none; }
+.page.active{ display:block; }
 
 /* 날짜 */
-.date-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+.date-row{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:16px;
+  margin-bottom:16px;
 }
 
-.nav-btn {
-  width: 42px;
-  height: 42px;
-  border: 1px solid #ddd;
-  background: #fff;
-  border-radius: 12px;
-  font-size: 18px;
+.nav-btn{
+  width:42px;
+  height:42px;
+  border:1px solid #ddd;
+  background:#fff;
+  border-radius:12px;
+  font-size:18px;
 }
 
-.nav-btn.disabled { opacity: 0.3; }
+.nav-btn.disabled{ opacity:.3; }
 
-#todayLabel {
-  font-size: 18px;
-  font-weight: 600;
+#todayLabel{
+  font-size:18px;
+  font-weight:700;
 }
 
-/* 운동 완료 버튼 (전처럼 큼) */
-.done-btn {
-  width: 100%;
-  height: 88px;
-  background: #000;
-  color: #fff;
-  border-radius: 20px;
-  font-size: 20px;
-  font-weight: 800;
-  border: none;
-  margin-bottom: 16px;
+/* 홈 - 운동 완료 버튼 (전처럼 큼) */
+.done-btn{
+  width:100%;
+  height:88px;
+  background:#000;
+  color:#fff;
+  border-radius:20px;
+  font-size:20px;
+  font-weight:800;
+  border:none;
+  margin-bottom:16px;
 }
 
 /* 부위 버튼 */
-.muscle-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+.muscle-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
 }
 
-.muscle {
-  height: 56px;
-  border-radius: 16px;
-  border: 2px solid #000;
-  background: #fff;
-  font-weight: 700;
+.muscle{
+  height:56px;
+  border-radius:16px;
+  border:2px solid #000;
+  background:#fff;
+  font-weight:800;
 }
 
-.muscle.selected {
-  background: #000;
-  color: #fff;
+.muscle.selected{
+  background:#000;
+  color:#fff;
 }
 
-.last-info {
-  margin-top: 12px;
-  font-size: 12px;
-  color: #666;
+.last-info{
+  margin-top:12px;
+  font-size:12px;
+  color:#666;
+  line-height:1.6;
 }
 
 /* 기록 */
-.weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  font-size: 12px;
-  text-align: center;
-  margin-bottom: 6px;
-  color: #888;
+.weekdays{
+  display:grid;
+  grid-template-columns:repeat(7, minmax(0,1fr));
+  font-size:12px;
+  text-align:center;
+  margin-bottom:6px;
+  color:#888;
+  font-weight:700;
 }
 
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7, minmax(0,1fr));
+  gap:6px;
 }
 
-.day {
-  border: 1px solid #eee;
-  border-radius: 14px;
-  padding: 6px;
-  min-height: 110px;
+.day{
+  border:1px solid #eee;
+  border-radius:14px;
+  padding:6px;
+  min-height:120px;
+  background:#fff;
 }
 
-.day h4 {
-  margin: 0 0 4px;
-  font-size: 12px;
-  font-weight: 600;
+.day h4{
+  margin:0 0 6px;
+  font-size:12px;
+  font-weight:800;
+  color:#111;
 }
 
-.slot {
-  height: 14px;
-  border: 1px solid #000;
-  border-radius: 8px;
-  margin-bottom: 3px;
+/* ✅ 슬롯: 텍스트를 담는 pill */
+.slot{
+  height:16px;
+  border:1px solid #000;
+  border-radius:999px;
+  margin-bottom:4px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:10px;
+  font-weight:800;
+  line-height:1;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+
+  background:#fff;
+  color:#000;
+}
+
+/* ✅ 선택된 부위는 검정 pill + 흰 글씨 */
+.slot.filled{
+  background:#000;
+  color:#fff;
 }
 
 /* 내보내기 */
-.copy-btn {
-  width: 100%;
-  height: 64px;
-  border-radius: 16px;
-  border: 2px solid #000;
-  background: #fff;
-  font-size: 16px;
-  font-weight: 700;
+.copy-btn{
+  width:100%;
+  height:64px;
+  border-radius:16px;
+  border:2px solid #000;
+  background:#fff;
+  font-size:16px;
+  font-weight:800;
 }
 
-pre {
-  margin-top: 12px;
-  background: #f7f7f7;
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 13px;
+pre{
+  margin-top:12px;
+  background:#f7f7f7;
+  padding:12px;
+  border-radius:10px;
+  font-size:13px;
+  white-space:pre-wrap;
 }
 
-/* 🔽 하단 탭바 */
-.bottom-tabs {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  border-top: 1px solid #eee;
-  background: #fff;
-  padding-bottom: env(safe-area-inset-bottom);
+/* 하단 탭바 */
+.bottom-tabs{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  border-top:1px solid #eee;
+  background:#fff;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 
-.bottom-tabs .tab {
-  flex: 1;
-  padding: 12px 0;
-  border: none;
-  background: none;
-  font-size: 14px;
-  color: #aaa;
+.bottom-tabs .tab{
+  flex:1;
+  padding:12px 0;
+  border:none;
+  background:none;
+  font-size:14px;
+  color:#aaa;
 }
 
-.bottom-tabs .tab.active {
-  color: #000;
-  font-weight: 700;
+.bottom-tabs .tab.active{
+  color:#000;
+  font-weight:800;
 }
