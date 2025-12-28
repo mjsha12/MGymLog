@@ -195,3 +195,16 @@ pre{
   color:#000;
   font-weight:800;
 }
+/* 홈 화면 운동 부위 버튼 */
+.muscle-btn {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 14px 0;
+}
+
+/* 선택된 운동 부위 버튼 */
+.muscle-btn.selected {
+  font-size: 18px;
+  font-weight: 600;
+}
+
