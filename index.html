@@ -3,8 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
   <title>MGymLog</title>
+
+  <!-- ✅ PWA -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- ✅ iOS 홈화면 아이콘(이게 없으면 iOS가 M으로 뜨는 경우 많음) -->
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -12,7 +21,7 @@
   <div class="app">
     <!-- 상단 헤더 -->
     <header class="header">
-      <div class="headerLeft">
+      <div class="headerInner">
         <div class="headerTitle">MGymLog</div>
       </div>
     </header>
@@ -29,13 +38,9 @@
 
         <button class="primaryBtn" id="workoutToggle" type="button">운동 완료</button>
 
-        <!-- 부위 선택 -->
         <div class="grid3" id="parts"></div>
 
-        <!-- ✅ 부위별 마지막 운동 표시 -->
         <div class="last-trained" id="lastTrained"></div>
-
-        
       </section>
 
       <!-- 기록 -->
