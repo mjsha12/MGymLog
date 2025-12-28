@@ -1,345 +1,197 @@
-/* =========================
-   MGymLog - style.css (FULL)
-   iOS-like clean UI + mobile safe areas
-   ========================= */
-
-:root{
-  --bg: #ffffff;
-  --text: #111111;
-  --muted: #8a8a8a;
-  --line: #e8e8e8;
-
-  --blue: #0A66C2;
-
-  --pill-bg: #ffffff;
-  --pill-border: #111111;
-
-  --selected-bg: #111111;
-  --selected-text: #ffffff;
-
-  --done-bg: #6f6f6f;          /* 운동 완료(비활성 느낌) */
-  --done-bg-active: #111111;   /* 운동 완료(활성/기록 있음) */
-
-  --radius-lg: 22px;
-  --radius-md: 16px;
-  --radius-sm: 12px;
+*{
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
 }
-
-*{ box-sizing: border-box; }
-html, body { height: 100%; }
 
 body{
   margin:0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display","SF Pro Text",
-               "Apple SD Gothic Neo","Noto Sans KR", system-ui, Segoe UI, Roboto, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background:#fff;
+  color:#111;
 }
 
-/* App wrapper */
-.app{
-  min-height: 100vh;
-  display:flex;
-  flex-direction: column;
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+/* 상단 */
+.topbar{
+  padding:14px 16px;
+  border-bottom:1px solid #eee;
 }
 
-/* Top title bar (MGymLog) */
-.header{
-  padding: 18px 18px 10px 18px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
+/* 메인 */
+main{
+  padding:16px;
+  padding-bottom:calc(90px + env(safe-area-inset-bottom));
 }
 
-.header .title{
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin: 0;
-}
-
-/* Page container */
-.page{
-  display:none;
-  padding: 18px;
-}
+.page{ display:none; }
 .page.active{ display:block; }
 
-/* =========================
-   HOME
-   ========================= */
-
-/* Date row with arrows */
-.dateRow{
+/* 날짜 */
+.date-row{
   display:flex;
-  align-items:center;
   justify-content:center;
-  gap: 18px;
-  margin-top: 10px;
-  margin-bottom: 14px;
+  align-items:center;
+  gap:16px;
+  margin-bottom:16px;
 }
 
-.navBtn{
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: #ffffff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size: 22px;
-  color: var(--blue);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+.nav-btn{
+  width:42px;
+  height:42px;
+  border:1px solid #ddd;
+  background:#fff;
+  border-radius:12px;
+  font-size:18px;
 }
 
-.navBtn.disabled{
-  opacity: 0.25;
-  pointer-events: none;
-}
+.nav-btn.disabled{ opacity:.3; }
 
 #todayLabel{
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-size:18px;
+  font-weight:700;
 }
 
-/* Done button (big) */
-#doneBtn{
-  width: 100%;
-  height: 96px;
-  border-radius: 24px;
-  border: 0;
-  background: var(--done-bg);
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin: 10px 0 18px 0;
+/* 홈 - 운동 완료 버튼 (전처럼 큼) */
+.done-btn{
+  width:100%;
+  height:88px;
+  background:#000;
+  color:#fff;
+  border-radius:20px;
+  font-size:20px;
+  font-weight:800;
+  border:none;
+  margin-bottom:16px;
 }
 
-/* JS에서 opacity로 조절하니까, 기본은 유지 */
-#doneBtn:active{
-  transform: translateY(1px);
-}
-
-/* Muscle grid (3 columns) */
-.muscleGrid{
+/* 부위 버튼 */
+.muscle-grid{
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-top: 6px;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
 }
 
-/* Muscle buttons (IMPORTANT: bigger and iOS-like readable) */
 .muscle{
-  height: 68px;
-  border-radius: 18px;
-  border: 3px solid var(--pill-border);
-  background: var(--pill-bg);
-  color: var(--blue);
-
-  /* ✅ 가독성 업: 운동 완료에 “가깝게” */
-  font-size: clamp(17px, 2.6vw, 20px);
-  font-weight: 800;
-  letter-spacing: -0.2px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  user-select:none;
-}
-
-.muscle:active{
-  transform: translateY(1px);
+  height:56px;
+  border-radius:16px;
+  border:2px solid #000;
+  background:#fff;
+  font-weight:800;
 }
 
 .muscle.selected{
-  background: var(--selected-bg);
-  color: var(--selected-text);
+  background:#000;
+  color:#fff;
 }
 
-/* Last trained info */
-#lastInfo{
-  margin-top: 14px;
-  font-size: 13px;
-  color: #6b6b6b;
-  line-height: 1.35;
-  word-break: keep-all;
+.last-info{
+  margin-top:12px;
+  font-size:12px;
+  color:#666;
+  line-height:1.6;
 }
 
-/* =========================
-   RECORD (14 days)
-   ========================= */
-
-.weekHeader{
+/* 기록 */
+.weekdays{
   display:grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-top: 8px;
-  margin-bottom: 10px;
-  padding: 0 2px;
-  color: #7a7a7a;
-  font-weight: 700;
-  font-size: 14px;
+  grid-template-columns:repeat(7, minmax(0,1fr));
+  font-size:12px;
   text-align:center;
+  margin-bottom:6px;
+  color:#888;
+  font-weight:700;
 }
 
-/* Calendar grid: 7 columns, 2 rows (14 days) */
-#calendar{
+.calendar{
   display:grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 12px 10px;
+  grid-template-columns:repeat(7, minmax(0,1fr));
+  gap:6px;
 }
 
-/* Each day column */
 .day{
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 10px 8px 10px 8px;
-  background: #ffffff;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
-  min-height: 200px; /* 기본 높이 */
+  border:1px solid #eee;
+  border-radius:14px;
+  padding:6px;
+  min-height:120px;
+  background:#fff;
 }
 
-/* Date label */
 .day h4{
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  text-align:left;
+  margin:0 0 6px;
+  font-size:12px;
+  font-weight:800;
+  color:#111;
 }
 
-/* Slots inside day */
+/* ✅ 슬롯: 텍스트를 담는 pill */
 .slot{
-  width: 100%;
-  height: 22px;
-  border-radius: 999px;
-  border: 2px solid #111111;
-  background: #ffffff;
-  margin: 6px 0;
-}
+  height:16px;
+  border:1px solid #000;
+  border-radius:999px;
+  margin-bottom:4px;
 
-/* Filled slot with text */
-.slot.filled{
-  background: #111111;
-  color: #ffffff;
   display:flex;
   align-items:center;
   justify-content:center;
 
-  /* 칸이 빽빽할 때도 읽히게 자동 느낌 */
-  font-size: clamp(10px, 1.7vw, 12px);
-  font-weight: 800;
-  letter-spacing: -0.2px;
-  padding: 0 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size:10px;
+  font-weight:800;
+  line-height:1;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+
+  background:#fff;
+  color:#000;
 }
 
-/* =========================
-   EXPORT
-   ========================= */
-
-#copyBtn{
-  width: 100%;
-  height: 86px;
-  border-radius: 20px;
-  border: 3px solid #111111;
-  background: #ffffff;
-  color: var(--blue);
-  font-size: 24px;
-  font-weight: 900;
-  letter-spacing: -0.4px;
+/* ✅ 선택된 부위는 검정 pill + 흰 글씨 */
+.slot.filled{
+  background:#000;
+  color:#fff;
 }
 
-#copyBtn:active{
-  transform: translateY(1px);
+/* 내보내기 */
+.copy-btn{
+  width:100%;
+  height:64px;
+  border-radius:16px;
+  border:2px solid #000;
+  background:#fff;
+  font-size:16px;
+  font-weight:800;
 }
 
-.exportBox{
-  margin-top: 14px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 14px;
-  background: #f5f5f5;
+pre{
+  margin-top:12px;
+  background:#f7f7f7;
+  padding:12px;
+  border-radius:10px;
+  font-size:13px;
+  white-space:pre-wrap;
 }
 
-#exportText{
-  margin:0;
-  white-space: pre-wrap;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #111111;
-}
-
-/* =========================
-   Bottom tab bar
-   ========================= */
-
-.tabbar{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  height: calc(64px + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-
-  border-top: 1px solid var(--line);
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
+/* 하단 탭바 */
+.bottom-tabs{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
   display:flex;
-  align-items:center;
-  justify-content:space-around;
-  z-index: 50;
+  border-top:1px solid #eee;
+  background:#fff;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 
-.tab{
-  flex: 1;
-  height: 64px;
-  border: 0;
-  background: transparent;
-  font-size: 18px;
-  font-weight: 800;
-  color: #b0b0b0;
+.bottom-tabs .tab{
+  flex:1;
+  padding:12px 0;
+  border:none;
+  background:none;
+  font-size:14px;
+  color:#aaa;
 }
 
-.tab.active{
-  color: #111111;
-}
-
-/* =========================
-   Responsive tweaks
-   ========================= */
-
-@media (max-width: 380px){
-  .header .title{ font-size: 38px; }
-
-  #doneBtn{ height: 88px; font-size: 22px; }
-  .navBtn{ width: 50px; height: 50px; }
-  #todayLabel{ font-size: 24px; }
-
-  .muscle{ height: 64px; font-size: clamp(16px, 3.2vw, 19px); }
-
-  .day{ min-height: 190px; }
-  .day h4{ font-size: 15px; }
-  .slot{ height: 21px; }
-}
-
-@media (min-width: 520px){
-  /* 데스크탑에서 너무 퍼지지 않게 */
-  .app, .header, .page{
-    max-width: 520px;
-    margin: 0 auto;
-  }
+.bottom-tabs .tab.active{
+  color:#000;
+  font-weight:800;
 }
