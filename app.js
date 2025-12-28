@@ -1,5 +1,5 @@
 const muscles = ["가슴","등","어깨","이두","삼두","코어","하체"];
-let viewDate = new Date(); // 홈에서 수정하는 날짜(기본: 오늘)
+let viewDate = new Date(); // 홈에서 편집하는 날짜 (기본: 오늘)
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
@@ -9,15 +9,13 @@ function load(){ return JSON.parse(localStorage.getItem("mgym") || "{}"); }
 function save(d){ localStorage.setItem("mgym", JSON.stringify(d)); }
 function fmt(d){ return `${d.getMonth()+1}.${d.getDate()}`; }
 
-/** 해당 날짜가 속한 주의 일요일(00:00)을 반환 */
 function sundayOfWeek(date){
   const d = new Date(date);
   d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - d.getDay()); // 일(0)~토(6)
+  d.setDate(d.getDate() - d.getDay());
   return d;
 }
 
-/** date + n일 */
 function addDays(date, n){
   const d = new Date(date);
   d.setHours(0,0,0,0);
@@ -37,7 +35,7 @@ function renderHome(){
   const data = load();
   const rec = data[key(viewDate)] || [];
 
-  // "운동 완료" 버튼: 기록이 있으면 진하게(이미 검정 배경이라 opacity만)
+  // 기록이 있으면 버튼 좀 더 진하게 느껴지게
   $("#doneBtn").style.opacity = rec.length ? "1" : "0.7";
 
   // 부위 선택 표시
@@ -45,12 +43,12 @@ function renderHome(){
     b.classList.toggle("selected", rec.includes(b.textContent));
   });
 
-  // 미래 이동 금지: viewDate가 오늘이면 → 비활성
+  // 미래 이동 금지: viewDate가 오늘이면 next 비활성
   const next = $("#nextDay");
-  if (isToday(viewDate)) next.classList.add("disabled");
+  if(isToday(viewDate)) next.classList.add("disabled");
   else next.classList.remove("disabled");
 
-  // 마지막 운동 정보 (오늘 기준)
+  // 마지막 운동 정보(오늘 기준)
   const info = muscles.map(m=>{
     let txt = "기록 없음";
     for(let i=0;i<365;i++){
@@ -68,10 +66,9 @@ function renderHome(){
 }
 
 /**
- * ✅ 14일 달력 규칙:
- * "오늘이 포함된 주의 전주 일요일"부터
- * "오늘이 포함된 주의 토요일"까지
- * => 총 14일(2주) = 전주(일~토) + 이번주(일~토)
+ * ✅ 기록(14일) 규칙:
+ * "오늘이 포함된 주의 전주 일요일" ~ "오늘이 포함된 주의 토요일"
+ * => 전주(일~토) + 이번주(일~토) = 14일
  */
 function renderCalendar(){
   const cal = $("#calendar");
@@ -80,9 +77,8 @@ function renderCalendar(){
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  const thisSun = sundayOfWeek(today);      // 이번 주 일요일
-  const start = addDays(thisSun, -7);       // ✅ 전주 일요일
-  // end는 thisSun+6(이번 주 토요일)인데, 우리는 14일 반복으로 충분
+  const thisSun = sundayOfWeek(today);
+  const start = addDays(thisSun, -7);
 
   for(let i=0;i<14;i++){
     const d = addDays(start, i);
@@ -92,10 +88,19 @@ function renderCalendar(){
     cell.innerHTML = `<h4>${fmt(d)}</h4>`;
 
     const rec = load()[key(d)] || [];
+
+    // ✅ 7개 슬롯을 항상 같은 순서로 유지 + 텍스트 표시
     muscles.forEach(m=>{
       const s = document.createElement("div");
       s.className = "slot";
-      if(rec.includes(m)) s.style.background = "#000";
+
+      if(rec.includes(m)){
+        s.classList.add("filled");
+        s.textContent = m;   // ✅ 여기에 "등/가슴..." 표시
+      } else {
+        s.textContent = "";  // 빈칸 유지
+      }
+
       cell.appendChild(s);
     });
 
@@ -114,31 +119,38 @@ function renderExport(){
 
 /* ===== 이벤트 ===== */
 
-// 운동 완료: 오늘(viewDate)의 기록 토글(있으면 삭제, 없으면 빈 배열 생성)
+// 운동 완료: 해당 날짜(viewDate)의 기록 토글
 $("#doneBtn").onclick = ()=>{
   const d = load();
   const k = key(viewDate);
+
+  // 있으면 삭제(취소), 없으면 생성(운동 완료)
   d[k] ? delete d[k] : d[k] = [];
+
   save(d);
   renderHome();
   renderCalendar();
 };
 
-// 부위 선택: 운동 완료(=해당 날짜 키 존재)된 날만 선택 가능
+// 부위 선택: 운동 완료(=해당 날짜 key 존재)된 날만 선택 가능
 $$(".muscle").forEach(b=>{
   b.onclick = ()=>{
     const d = load();
     const k = key(viewDate);
-    if(!d[k]) return; // 운동 완료 누르기 전이면 무시
+    if(!d[k]) return; // 운동 완료를 먼저 누르기 전이면 무시
+
     const m = b.textContent;
-    d[k].includes(m) ? d[k]=d[k].filter(x=>x!==m) : d[k].push(m);
+    d[k].includes(m)
+      ? d[k] = d[k].filter(x=>x!==m)
+      : d[k].push(m);
+
     save(d);
     renderHome();
     renderCalendar();
   };
 });
 
-// 홈 날짜 이동(과거/현재만)
+// 날짜 이동(과거/현재만)
 $("#prevDay").onclick = ()=>{
   viewDate = addDays(viewDate, -1);
   renderHome();
