@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MGymLog</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="app">
+    <!-- 상단 헤더 -->
+    <header class="header">
+      <div class="headerLeft">
+        <div class="headerTitle">MGymLog</div>
+      </div>
+    </header>
+
+    <!-- 콘텐츠 -->
+    <main class="content">
+      <!-- 홈 -->
+      <section class="tab is-active" id="tab-home">
+        <div class="homeTop">
+          <button class="iconBtn" id="prevDayBtn" type="button" aria-label="이전 날짜">←</button>
+          <div class="date" id="todayLabel">--.--</div>
+          <button class="iconBtn" id="nextDayBtn" type="button" aria-label="다음 날짜">→</button>
+        </div>
+
+        <button class="primaryBtn" id="workoutToggle" type="button">운동 완료</button>
+
+        <!-- 부위 선택 -->
+        <div class="grid3" id="parts"></div>
+
+        <!-- ✅ 부위별 마지막 운동 표시 -->
+        <div class="last-trained" id="lastTrained"></div>
+
+        
+      </section>
+
+      <!-- 기록 -->
+      <section class="tab" id="tab-records">
+        <div class="weekdays">
+          <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        </div>
+        <div class="calendar" id="calendar"></div>
+      </section>
+
+      <!-- 내보내기 -->
+      <section class="tab" id="tab-export">
+        <button class="primaryBtn" id="copyBtn" type="button">복사하기</button>
+        <div class="hint" id="copyStatus"></div>
+        <textarea class="exportBox" id="exportPreview" readonly
+          placeholder="복사할 내용 미리보기(자동 생성)"></textarea>
+      </section>
+    </main>
+
+    <!-- 하단 탭바 -->
+    <nav class="tabbar">
+      <button class="tabbtn is-active" data-tab="home" type="button">홈</button>
+      <button class="tabbtn" data-tab="records" type="button">기록</button>
+      <button class="tabbtn" data-tab="export" type="button">내보내기</button>
+    </nav>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

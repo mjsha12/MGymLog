@@ -1,0 +1,292 @@
+:root{
+  --bg:#ffffff;
+  --text:#111111;
+  --muted:#8a8f98;
+  --line:#e6e7eb;
+  --soft:#f3f4f6;
+  --maxw: 480px;
+
+  /* 달력 슬롯 자동 최적화 */
+  --cell-minh: 138px;
+  --slot-h: 20px;
+  --slot-fs: 11px;
+}
+
+:root{
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.app{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:var(--bg);
+  padding-top: calc(10px + var(--safe-top));
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.headerLeft{
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.headerTitle{
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+.content{
+  flex:1;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  width: 100%;
+  padding: 18px 16px calc(16px + 74px + var(--safe-bottom));
+}
+
+.tab{ display:none; }
+.tab.is-active{ display:block; }
+
+.homeTop{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.date{
+  min-width: 96px;
+  text-align:center;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.iconBtn{
+  width: 44px;
+  height: 44px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 900;
+  cursor:pointer;
+}
+.iconBtn:active{ transform: translateY(1px); }
+.iconBtn:disabled{ opacity:.25; cursor:not-allowed; }
+
+.primaryBtn{
+  width: 100%;
+  height: 92px;
+  border: 2px solid #111;
+  background:#fff;
+  border-radius: 16px;
+  font-size: 20px;
+  font-weight: 900;
+  cursor:pointer;
+  margin-bottom: 16px;
+}
+.primaryBtn.is-on{
+  background:#111;
+  color:#fff;
+}
+
+/* 홈 부위 버튼 3열 */
+.grid3{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.partBtn{
+  height: 70px;
+  border: 2px solid #111;
+  background:#fff;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor:pointer;
+}
+
+.partBtn.is-selected{ background: var(--soft); }
+.partBtn.is-disabled{
+  border-color:#c9ccd3;
+  color:#c9ccd3;
+  cursor:not-allowed;
+}
+
+/* ✅ 홈 하단: 마지막 운동(작은 글씨) */
+.last-trained{
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  justify-content: center;
+}
+.last-trained .item{
+  white-space: nowrap;
+}
+
+.hint{
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  text-align:center;
+  margin-top: 8px;
+}
+
+/* 기록 */
+.weekdays{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-weight: 900;
+  padding: 0 2px;
+}
+.weekdays > div{
+  text-align:center;
+  font-size: 12px;
+}
+
+.calendar{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+/* 달력 칸/슬롯 자동 최적화 */
+.cell{
+  min-height: var(--cell-minh);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:#fff;
+  padding: 10px;
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+
+.cellHeader{
+  font-size: 12px;
+  font-weight: 900;
+  color:#111;
+  line-height: 1.1;
+}
+
+.cell.today{
+  outline: 3px solid #111;
+  outline-offset: -3px;
+}
+.cell.selected{
+  outline: 3px solid #c9ccd3;
+  outline-offset: -3px;
+}
+
+.slots{
+  display:flex;
+  flex-direction:column;
+  gap: 5px;
+}
+
+.slot{
+  height: var(--slot-h);
+  border: 1px solid #111;
+  border-radius: 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: var(--slot-fs);
+  font-weight: 900;
+  line-height: 1;
+  padding: 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slot.empty{ color: transparent; }
+
+/* 작은 화면(아이폰 SE 등) */
+@media (max-width: 390px){
+  :root{
+    --cell-minh: 126px;
+    --slot-h: 18px;
+    --slot-fs: 10px;
+  }
+  .calendar{ gap: 8px; }
+  .weekdays{ gap: 8px; }
+  .cell{ padding: 9px; }
+  .slots{ gap: 4px; }
+}
+
+/* 큰 화면(프로 맥스 등) */
+@media (min-width: 430px){
+  :root{
+    --cell-minh: 150px;
+    --slot-h: 21px;
+    --slot-fs: 11px;
+  }
+}
+
+/* 내보내기 */
+.exportBox{
+  width: 100%;
+  height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 13px;
+  background:#fff;
+  margin-top: 10px;
+  resize: vertical;
+}
+
+/* 하단 탭바 */
+.tabbar{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-bottom: var(--safe-bottom);
+  background: rgba(255,255,255,0.92);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  display:flex;
+  justify-content:space-around;
+  gap: 8px;
+  padding-top: 10px;
+}
+
+.tabbtn{
+  border:none;
+  background:transparent;
+  font-size: 13px;
+  font-weight: 900;
+  color:#b1b4bb;
+  padding: 10px 10px 14px;
+  cursor:pointer;
+}
+.tabbtn.is-active{ color:#111; }
