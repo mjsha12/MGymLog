@@ -5,66 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MGymLog</title>
 
-  <!-- PWA(나중에 사용할 것) -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#ffffff" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<header class="topbar">
-  <h1>MGymLog</h1>
-</header>
+  <!-- 상단 -->
+  <header class="topbar">
+    <h1>MGymLog</h1>
+  </header>
 
-<main>
-  <!-- 홈 -->
-  <section id="home" class="page active">
-    <div class="date-row">
-      <button id="prevDay" class="nav-btn">←</button>
-      <div id="todayLabel"></div>
-      <button id="nextDay" class="nav-btn disabled">→</button>
-    </div>
+  <main>
+    <!-- 홈 -->
+    <section id="home" class="page active">
+      <div class="date-row">
+        <button id="prevBtn" class="nav-btn">←</button>
+        <div id="todayLabel">--.--</div>
+        <button id="nextBtn" class="nav-btn">→</button>
+      </div>
 
-    <button id="doneBtn" class="done-btn">운동 완료</button>
+      <button class="done-btn">운동 완료</button>
 
-    <div class="muscle-grid">
-      <button class="muscle">가슴</button>
-      <button class="muscle">등</button>
-      <button class="muscle">어깨</button>
-      <button class="muscle">이두</button>
-      <button class="muscle">삼두</button>
-      <button class="muscle">코어</button>
-      <button class="muscle">하체</button>
-    </div>
+      <div class="muscle-grid">
+        <button class="muscle" data-muscle="가슴">가슴</button>
+        <button class="muscle" data-muscle="등">등</button>
+        <button class="muscle" data-muscle="어깨">어깨</button>
+        <button class="muscle" data-muscle="이두">이두</button>
+        <button class="muscle" data-muscle="삼두">삼두</button>
+        <button class="muscle" data-muscle="코어">코어</button>
+        <button class="muscle" data-muscle="하체">하체</button>
+      </div>
 
-    <div id="lastInfo" class="last-info"></div>
-  </section>
+      <div class="last-info"></div>
+    </section>
 
-  <!-- 기록 -->
-  <section id="record" class="page">
-    <div class="weekdays">
-      <div>일</div><div>월</div><div>화</div><div>수</div>
-      <div>목</div><div>금</div><div>토</div>
-    </div>
-    <div id="calendar" class="calendar"></div>
-  </section>
+    <!-- 기록 -->
+    <section id="record" class="page">
+      <div class="weekdays">
+        <div>일</div><div>월</div><div>화</div><div>수</div>
+        <div>목</div><div>금</div><div>토</div>
+      </div>
+      <div class="calendar"></div>
+    </section>
 
-  <!-- 내보내기 -->
-  <section id="export" class="page">
-    <button id="copyBtn" class="copy-btn">복사하기</button>
-    <pre id="exportText"></pre>
-  </section>
-</main>
+    <!-- 내보내기 -->
+    <section id="export" class="page">
+      <button id="copyBtn" class="copy-btn">복사하기</button>
+      <pre></pre>
+    </section>
+  </main>
 
-<!-- 하단 탭바 -->
-<nav class="bottom-tabs">
-  <button class="tab active" data-tab="home">홈</button>
-  <button class="tab" data-tab="record">기록</button>
-  <button class="tab" data-tab="export">내보내기</button>
-</nav>
+  <!-- 하단 탭 -->
+  <nav class="bottom-tabs">
+    <button class="tab active" data-tab="home">홈</button>
+    <button class="tab" data-tab="record">기록</button>
+    <button class="tab" data-tab="export">내보내기</button>
+  </nav>
 
-<script src="app.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
+
