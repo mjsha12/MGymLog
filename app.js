@@ -1,171 +1,149 @@
 const muscles = ["가슴","등","어깨","이두","삼두","코어","하체"];
-let viewDate = new Date();
 
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
+let selectedDate = getToday();
+let records = JSON.parse(localStorage.getItem("records") || "{}");
 
-function key(d){ return d.toISOString().slice(0,10); }
-function load(){ return JSON.parse(localStorage.getItem("mgym") || "{}"); }
-function save(d){ localStorage.setItem("mgym", JSON.stringify(d)); }
-function fmt(d){ return `${d.getMonth()+1}.${d.getDate()}`; }
-
-function sundayOfWeek(date){
-  const d = new Date(date);
-  d.setHours(0,0,0,0);
-  d.setDate(d.getDate() - d.getDay());
-  return d;
+/* ------------------ 날짜 유틸 ------------------ */
+function getToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
+function pad(n){ return n.toString().padStart(2,"0"); }
 
-function addDays(date, n){
-  const d = new Date(date);
-  d.setHours(0,0,0,0);
-  d.setDate(d.getDate() + n);
-  return d;
-}
+/* ------------------ 홈 ------------------ */
+function renderHome() {
+  document.getElementById("todayLabel").textContent = formatDate(selectedDate);
 
-function todayKey(){
-  const t = new Date();
-  t.setHours(0,0,0,0);
-  return key(t);
-}
-
-function isToday(d){
-  return key(d) === todayKey();
-}
-
-function renderHome(){
-  $("#todayLabel").textContent = fmt(viewDate);
-
-  const data = load();
-  const rec = data[key(viewDate)] || [];
-
-  $("#doneBtn").style.opacity = rec.length ? "1" : "0.35";
-
-  $$(".muscle").forEach(b=>{
-    b.classList.toggle("selected", rec.includes(b.textContent));
+  document.querySelectorAll(".muscle").forEach(btn=>{
+    const m = btn.dataset.muscle;
+    btn.classList.toggle(
+      "selected",
+      records[selectedDate]?.includes(m)
+    );
   });
 
-  const next = $("#nextDay");
-  if(isToday(viewDate)) next.classList.add("disabled");
-  else next.classList.remove("disabled");
-
-  const info = muscles.map(m=>{
-    let txt = "기록 없음";
-    for(let i=0;i<365;i++){
-      const d = new Date();
-      d.setHours(0,0,0,0);
-      d.setDate(d.getDate()-i);
-      if((load()[key(d)]||[]).includes(m)){
-        txt = i===0 ? "오늘" : `${i}일 전`;
-        break;
-      }
-    }
-    return `${m}: ${txt}`;
-  }).join(" · ");
-  $("#lastInfo").textContent = info;
+  updateDoneBtn();
+  updateLastInfo();
 }
 
-/* ✅ 기록: 전주 일요일 ~ 이번주 토요일 (14일) */
-function renderCalendar(){
-  const cal = $("#calendar");
-  cal.innerHTML = "";
+function toggleMuscle(muscle){
+  if(!records[selectedDate]) records[selectedDate]=[];
 
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  if(records[selectedDate].includes(muscle)){
+    records[selectedDate] = records[selectedDate].filter(m=>m!==muscle);
+    if(records[selectedDate].length===0) delete records[selectedDate];
+  }else{
+    records[selectedDate].push(muscle);
+  }
 
-  const thisSun = sundayOfWeek(today);
-  const start = addDays(thisSun, -7);
+  save();
+  renderHome();
+  renderCalendar();
+  renderExport();
+}
 
-  for(let i=0;i<14;i++){
-    const d = addDays(start, i);
-
-    const cell = document.createElement("div");
-    cell.className = "day";
-
-    /* 🔥 오늘 날짜 표시용 클래스 */
-    if(isToday(d)){
-      cell.classList.add("today");
-    }
-
-    cell.innerHTML = `<h4>${fmt(d)}</h4>`;
-
-    const rec = load()[key(d)] || [];
-
-    muscles.forEach(m=>{
-      const s = document.createElement("div");
-      s.className = "slot";
-
-      if(rec.includes(m)){
-        s.classList.add("filled");
-        s.textContent = m;
-      }
-
-      cell.appendChild(s);
-    });
-
-    cal.appendChild(cell);
+function updateDoneBtn(){
+  const btn = document.querySelector(".done-btn");
+  if(records[selectedDate]?.length){
+    btn.style.background="#000";
+    btn.style.color="#fff";
+  }else{
+    btn.style.background="#aaa";
+    btn.style.color="#fff";
   }
 }
 
-function renderExport(){
-  const d = load();
-  $("#exportText").textContent =
-    Object.entries(d)
-      .sort(([a],[b]) => a.localeCompare(b))
-      .map(([k,v])=>`${k}: ${v.join(", ")}`)
-      .join("\n");
+/* ------------------ 기록 ------------------ */
+function renderCalendar(){
+  const cal = document.querySelector(".calendar");
+  cal.innerHTML="";
+
+  const start = getWeekStart(selectedDate);
+  for(let i=0;i<14;i++){
+    const date = addDays(start,i);
+    const day = document.createElement("div");
+    day.className="day";
+    if(date===selectedDate) day.classList.add("today");
+
+    const h4 = document.createElement("h4");
+    h4.textContent = formatDate(date);
+    day.appendChild(h4);
+
+    muscles.forEach(m=>{
+      const s = document.createElement("div");
+      s.className="slot";
+      if(records[date]?.includes(m)){
+        s.classList.add("filled");
+        s.textContent=m;
+      }
+      day.appendChild(s);
+    });
+
+    cal.appendChild(day);
+  }
 }
 
-/* ===== 이벤트 ===== */
+/* ------------------ 내보내기 ------------------ */
+function renderExport(){
+  const box = document.querySelector("pre");
+  const lines = Object.keys(records)
+    .sort()
+    .map(d => `${d}: ${records[d].join(", ")}`);
+  box.textContent = lines.join("\n");
+}
 
-$("#doneBtn").onclick = ()=>{};
+function copyExport(){
+  navigator.clipboard.writeText(document.querySelector("pre").textContent);
+}
 
-$$(".muscle").forEach(b=>{
-  b.onclick = ()=>{
-    const d = load();
-    const k = key(viewDate);
+/* ------------------ 날짜 이동 ------------------ */
+function moveDate(diff){
+  const today = getToday();
+  const next = addDays(selectedDate,diff);
+  if(next>today) return;
+  selectedDate=next;
+  renderAll();
+}
 
-    if(!d[k]) d[k] = [];
+/* ------------------ 헬퍼 ------------------ */
+function addDays(date,n){
+  const d = new Date(date+"T12:00:00");
+  d.setDate(d.getDate()+n);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
 
-    const m = b.textContent;
-    d[k].includes(m)
-      ? d[k] = d[k].filter(x=>x!==m)
-      : d[k].push(m);
+function getWeekStart(date){
+  const d = new Date(date+"T12:00:00");
+  d.setDate(d.getDate()-d.getDay()-7);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
 
-    if(d[k].length === 0) delete d[k];
+function formatDate(d){
+  const [y,m,dd]=d.split("-");
+  return `${m}.${dd}`;
+}
 
-    save(d);
-    renderHome();
-    renderCalendar();
-  };
-});
+function updateLastInfo(){
+  const info = muscles.map(m=>{
+    let last=null;
+    Object.keys(records).forEach(d=>{
+      if(records[d].includes(m)) last=d;
+    });
+    if(!last) return `${m}: 기록 없음`;
+    const diff = Math.floor((new Date(selectedDate)-new Date(last+"T12:00:00"))/86400000);
+    return `${m}: ${diff}일 전`;
+  });
+  document.querySelector(".last-info").textContent=info.join(" · ");
+}
 
-$("#prevDay").onclick = ()=>{
-  viewDate = addDays(viewDate, -1);
+function save(){
+  localStorage.setItem("records",JSON.stringify(records));
+}
+
+function renderAll(){
   renderHome();
-};
+  renderCalendar();
+  renderExport();
+}
 
-$("#nextDay").onclick = ()=>{
-  if($("#nextDay").classList.contains("disabled")) return;
-  viewDate = addDays(viewDate, +1);
-  renderHome();
-};
-
-$("#copyBtn").onclick = ()=>{
-  navigator.clipboard.writeText($("#exportText").textContent);
-};
-
-$$(".tab").forEach(t=>{
-  t.onclick = ()=>{
-    $$(".tab").forEach(x=>x.classList.remove("active"));
-    $$(".page").forEach(x=>x.classList.remove("active"));
-    t.classList.add("active");
-    $("#"+t.dataset.tab).classList.add("active");
-
-    if(t.dataset.tab==="record") renderCalendar();
-    if(t.dataset.tab==="export") renderExport();
-  };
-});
-
-renderHome();
-renderCalendar();
+renderAll();
