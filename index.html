@@ -7,6 +7,7 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
@@ -14,7 +15,6 @@
 </head>
 <body>
 
-  <!-- 상단 -->
   <header class="topbar">
     <h1>MGymLog</h1>
   </header>
@@ -23,12 +23,12 @@
     <!-- 홈 -->
     <section id="home" class="page active">
       <div class="date-row">
-        <button id="prevBtn" class="nav-btn">←</button>
+        <button id="prevBtn" class="nav-btn" aria-label="전날">←</button>
         <div id="todayLabel">--.--</div>
-        <button id="nextBtn" class="nav-btn">→</button>
+        <button id="nextBtn" class="nav-btn" aria-label="다음날">→</button>
       </div>
 
-      <button class="done-btn">운동 완료</button>
+      <button class="done-btn" id="doneBtn">운동 완료</button>
 
       <div class="muscle-grid">
         <button class="muscle" data-muscle="가슴">가슴</button>
@@ -59,13 +59,13 @@
     </section>
   </main>
 
-  <!-- 하단 탭 -->
   <nav class="bottom-tabs">
     <button class="tab active" data-tab="home">홈</button>
     <button class="tab" data-tab="record">기록</button>
     <button class="tab" data-tab="export">내보내기</button>
   </nav>
 
+  <!-- ✅ 반드시 defer 유지 -->
   <script src="script.js" defer></script>
 </body>
 </html>
