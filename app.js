@@ -1,327 +1,361 @@
 /* =========================
-   MGymLog (Local date safe)
-   - 날짜 하루 빨라짐(UTC) 문제: toISOString() 사용 금지
-   - 로컬 YYYY-MM-DD 키로 저장/표시
+   설정
 ========================= */
-
 const MUSCLES = ["가슴","등","어깨","이두","삼두","코어","하체"];
-const STORAGE_KEY = "mgymlog_records_v2"; // 새 키(깨진 데이터 피하려고)
 const WEEKDAYS = ["일","월","화","수","목","금","토"];
 
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-
-const pageHome = $("#pageHome");
-const pageLog = $("#pageLog");
-const pageExport = $("#pageExport");
-
-const btnPrevDay = $("#btnPrevDay");
-const btnNextDay = $("#btnNextDay");
-const todayLabel = $("#todayLabel");
-const doneBtn = $("#doneBtn");
-const muscleGrid = $("#muscleGrid");
-const lastInfo = $("#lastInfo");
-
-const weekdaysRow = $("#weekdaysRow");
-const calendarGrid = $("#calendarGrid");
-
-const copyBtn = $("#copyBtn");
-const exportText = $("#exportText");
-
-// ---------- 날짜 유틸 (로컬) ----------
-function startOfDay(d){
-  const x = new Date(d);
-  x.setHours(0,0,0,0);
-  return x;
+// 로컬 날짜(YYYY-MM-DD)로 고정: UTC 때문에 하루 밀리는 버그 근본 해결
+function toLocalISODate(d){
+  const dt = new Date(d);
+  dt.setHours(0,0,0,0);
+  const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0,10); // local 기준 YYYY-MM-DD
 }
 
-function addDays(d, n){
-  const x = new Date(d);
-  x.setDate(x.getDate() + n);
-  return x;
+function fromLocalISODate(s){
+  // s: YYYY-MM-DD 를 로컬 자정으로 복원
+  const [y,m,dd] = s.split("-").map(Number);
+  const dt = new Date(y, m-1, dd);
+  dt.setHours(0,0,0,0);
+  return dt;
 }
 
-function pad2(n){ return String(n).padStart(2,"0"); }
-
-// ✅ 로컬 날짜키(YYYY-MM-DD)
-function toDateKeyLocal(d){
-  const x = startOfDay(d);
-  return `${x.getFullYear()}-${pad2(x.getMonth()+1)}-${pad2(x.getDate())}`;
+function mmddLabel(d){
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${m}.${day}`;
 }
 
-// ✅ 로컬 표시(MM.DD)
-function toLabelMMDD(d){
-  const x = startOfDay(d);
-  return `${pad2(x.getMonth()+1)}.${pad2(x.getDate())}`;
+function clampToToday(date){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  if(d.getTime() > today.getTime()) return today;
+  return d;
 }
 
-// 일요일(그 주 시작) 구하기
-function getSunday(d){
-  const x = startOfDay(d);
-  const day = x.getDay(); // 0=일
-  return addDays(x, -day);
-}
+/* =========================
+   저장 구조
+   localStorage["mgymlog:data"] = {
+     "YYYY-MM-DD": { muscles: ["가슴","등"...] }
+   }
+========================= */
+const STORAGE_KEY = "mgymlog:data";
 
-// ---------- 데이터 ----------
-function loadRecords(){
+function loadData(){
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  }catch{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  }catch(e){
     return {};
   }
 }
 
-function saveRecords(records){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+function saveData(data){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function getMusclesForDate(records, dateKey){
-  const arr = records[dateKey];
-  return Array.isArray(arr) ? arr : [];
+/* =========================
+   DOM
+========================= */
+const pages = {
+  home: document.querySelector("#page-home"),
+  log: document.querySelector("#page-log"),
+  export: document.querySelector("#page-export"),
+};
+
+const tabs = Array.from(document.querySelectorAll(".bottom-tabs .tab"));
+
+const todayLabelEl = document.querySelector("#todayLabel");
+const btnPrev = document.querySelector("#btnPrev");
+const btnNext = document.querySelector("#btnNext");
+const doneBtn = document.querySelector("#doneBtn");
+const muscleGrid = document.querySelector("#muscleGrid");
+const lastInfo = document.querySelector("#lastInfo");
+
+const weekdaysEl = document.querySelector("#weekdays");
+const calendarEl = document.querySelector("#calendar");
+
+const copyBtn = document.querySelector("#copyBtn");
+const exportText = document.querySelector("#exportText");
+
+/* =========================
+   상태
+========================= */
+let data = loadData();
+
+// 홈에서 편집 중인 날짜(로컬 자정)
+let activeDate = new Date();
+activeDate.setHours(0,0,0,0);
+
+/* =========================
+   UI 생성
+========================= */
+function buildWeekdays(){
+  weekdaysEl.innerHTML = "";
+  WEEKDAYS.forEach(w=>{
+    const div = document.createElement("div");
+    div.textContent = w;
+    weekdaysEl.appendChild(div);
+  });
 }
 
-function setMusclesForDate(records, dateKey, muscles){
-  records[dateKey] = muscles;
-  saveRecords(records);
-}
-
-// ---------- 상태 ----------
-const today = startOfDay(new Date());
-let focusedDate = startOfDay(new Date()); // 홈에서 수정할 날짜
-
-// ---------- UI: 탭 ----------
-function setActiveTab(tabName){
-  $$(".tab").forEach(btn => btn.classList.remove("active"));
-  const btn = $(`.tab[data-target="${tabName}"]`);
-  if(btn) btn.classList.add("active");
-
-  pageHome.classList.remove("active");
-  pageLog.classList.remove("active");
-  pageExport.classList.remove("active");
-
-  if(tabName === "home") pageHome.classList.add("active");
-  if(tabName === "log") pageLog.classList.add("active");
-  if(tabName === "export") pageExport.classList.add("active");
-
-  // 렌더 갱신
-  if(tabName === "home") renderHome();
-  if(tabName === "log") renderLog();
-  if(tabName === "export") renderExport();
-}
-
-$$(".tab").forEach(btn => {
-  btn.addEventListener("click", () => setActiveTab(btn.dataset.target));
-});
-
-// ---------- 홈 렌더 ----------
-function renderMuscleButtons(selected){
+function buildMuscleButtons(){
   muscleGrid.innerHTML = "";
-  MUSCLES.forEach(name => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "muscle" + (selected.includes(name) ? " selected" : "");
-    b.textContent = name;
+  MUSCLES.forEach(name=>{
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "muscle";
+    btn.textContent = name;
+    btn.dataset.muscle = name;
 
-    b.addEventListener("click", () => {
-      const records = loadRecords();
-      const key = toDateKeyLocal(focusedDate);
-      const cur = getMusclesForDate(records, key);
-
-      let next;
-      if(cur.includes(name)){
-        next = cur.filter(x => x !== name);
-      }else{
-        next = [...cur, name];
-      }
-      // 정렬은 MUSCLES 순서 유지
-      next = MUSCLES.filter(m => next.includes(m));
-
-      setMusclesForDate(records, key, next);
-      renderHome();  // 홈 갱신
+    btn.addEventListener("click", ()=>{
+      toggleMuscleForActiveDate(name);
     });
 
-    muscleGrid.appendChild(b);
+    muscleGrid.appendChild(btn);
   });
 }
 
-function renderDoneButton(selected){
-  // 운동 완료: "부위가 하나라도 있으면 active(검정)" / 없으면 회색
-  doneBtn.classList.toggle("active", selected.length > 0);
-
-  // 클릭하면 "해당 날짜 기록 전체 삭제" 토글로 동작(원하면 유지)
-  doneBtn.onclick = () => {
-    const records = loadRecords();
-    const key = toDateKeyLocal(focusedDate);
-    const cur = getMusclesForDate(records, key);
-
-    if(cur.length === 0){
-      // 아무것도 없으면: 기본으로 "가슴" 같은 자동 선택은 안 함 (사용자 의도대로 직접 선택)
-      // 대신 안내용: 아무것도 하지 않음
-      return;
-    }else{
-      // 있으면 전체 삭제
-      setMusclesForDate(records, key, []);
-      renderHome();
-    }
-  };
+/* =========================
+   기록 토글/반영
+========================= */
+function getEntry(dateObj){
+  const key = toLocalISODate(dateObj);
+  return data[key] || { muscles: [] };
 }
 
-function renderNavButtons(){
-  // 미래로는 이동 금지: focusedDate < today 일 때만 다음 버튼 활성
-  const canGoNext = startOfDay(focusedDate).getTime() < today.getTime();
-  btnNextDay.classList.toggle("disabled", !canGoNext);
-
-  btnPrevDay.onclick = () => {
-    focusedDate = addDays(focusedDate, -1);
-    renderHome();
-  };
-
-  btnNextDay.onclick = () => {
-    if(!canGoNext) return;
-    focusedDate = addDays(focusedDate, +1);
-    renderHome();
-  };
-}
-
-function renderLastInfo(){
-  const records = loadRecords();
-  const base = startOfDay(focusedDate);
-
-  const parts = MUSCLES.map(m => {
-    // base 기준으로 "마지막 운동한 날짜" 찾아서 n일 전 계산
-    // records의 모든 키 탐색
-    let lastDate = null;
-
-    for(const [k, arr] of Object.entries(records)){
-      if(!Array.isArray(arr)) continue;
-      if(!arr.includes(m)) continue;
-
-      // k(YYYY-MM-DD)를 로컬 Date로 파싱(UTC 오프셋 없이)
-      const [yy, mm, dd] = k.split("-").map(Number);
-      const d = new Date(yy, mm-1, dd);
-      d.setHours(0,0,0,0);
-
-      // base보다 미래 기록은 무시
-      if(d.getTime() > base.getTime()) continue;
-
-      if(!lastDate || d.getTime() > lastDate.getTime()){
-        lastDate = d;
-      }
-    }
-
-    if(!lastDate) return `${m}: 기록 없음`;
-
-    const diffMs = base.getTime() - lastDate.getTime();
-    const diffDays = Math.round(diffMs / (24*60*60*1000));
-
-    if(diffDays === 0) return `${m}: 오늘`;
-    return `${m}: ${diffDays}일 전`;
-  });
-
-  lastInfo.textContent = parts.join(" · ");
-}
-
-function renderHome(){
-  const records = loadRecords();
-  const key = toDateKeyLocal(focusedDate);
-  const selected = getMusclesForDate(records, key);
-
-  todayLabel.textContent = toLabelMMDD(focusedDate);
-
-  renderNavButtons();
-  renderDoneButton(selected);
-  renderMuscleButtons(selected);
-  renderLastInfo();
-}
-
-// ---------- 기록 렌더 (14일: 전주 일요일 ~ 이번주 토요일) ----------
-function renderWeekdays(){
-  weekdaysRow.innerHTML = "";
-  WEEKDAYS.forEach(w => {
-    const d = document.createElement("div");
-    d.textContent = w;
-    weekdaysRow.appendChild(d);
-  });
-}
-
-function renderLog(){
-  renderWeekdays();
-
-  const records = loadRecords();
-  calendarGrid.innerHTML = "";
-
-  const thisSunday = getSunday(today);           // 이번주 일요일
-  const start = addDays(thisSunday, -7);         // 전주 일요일
-  const end = addDays(thisSunday, 6);            // 이번주 토요일 (총 14일)
-
-  for(let i=0; i<14; i++){
-    const d = addDays(start, i);
-    const key = toDateKeyLocal(d);
-    const selected = getMusclesForDate(records, key);
-
-    const dayCard = document.createElement("div");
-    dayCard.className = "day" + (key === toDateKeyLocal(today) ? " today" : "");
-
-    const h4 = document.createElement("h4");
-    h4.textContent = toLabelMMDD(d);
-    dayCard.appendChild(h4);
-
-    // 슬롯 7개 (고정 순서)
-    MUSCLES.forEach(m => {
-      const slot = document.createElement("div");
-      slot.className = "slot" + (selected.includes(m) ? " filled" : "");
-      slot.textContent = selected.includes(m) ? m : "";
-      dayCard.appendChild(slot);
-    });
-
-    calendarGrid.appendChild(dayCard);
+function setEntry(dateObj, entry){
+  const key = toLocalISODate(dateObj);
+  // muscles가 비면 기록 삭제(깔끔)
+  if(!entry.muscles || entry.muscles.length === 0){
+    delete data[key];
+  }else{
+    data[key] = { muscles: entry.muscles.slice() };
   }
+  saveData(data);
 }
 
-// ---------- 내보내기 ----------
-function buildExportText(records){
-  // 날짜 오름차순 정렬
-  const keys = Object.keys(records)
-    .filter(k => Array.isArray(records[k]) && records[k].length > 0)
-    .sort((a,b) => a.localeCompare(b));
+function toggleMuscleForActiveDate(muscle){
+  const d = clampToToday(activeDate);
+  activeDate = d;
 
-  if(keys.length === 0) return "";
+  const entry = getEntry(activeDate);
+  const set = new Set(entry.muscles);
 
-  return keys.map(k => {
-    const arr = MUSCLES.filter(m => records[k].includes(m));
-    return `${k}: ${arr.join(", ")}`;
-  }).join("\n");
-}
+  if(set.has(muscle)) set.delete(muscle);
+  else set.add(muscle);
 
-function renderExport(){
-  const records = loadRecords();
-  exportText.textContent = buildExportText(records);
-
-  copyBtn.onclick = async () => {
-    const text = exportText.textContent || "";
-    try{
-      await navigator.clipboard.writeText(text);
-      copyBtn.textContent = "복사됨!";
-      setTimeout(() => copyBtn.textContent = "복사하기", 900);
-    }catch{
-      // iOS 일부 환경 fallback
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      copyBtn.textContent = "복사됨!";
-      setTimeout(() => copyBtn.textContent = "복사하기", 900);
-    }
-  };
-}
-
-// ---------- 초기 실행 ----------
-(function init(){
-  // 홈 부위 버튼 렌더 먼저(초기 깜빡임 방지)
+  setEntry(activeDate, { muscles: Array.from(set) });
   renderHome();
   renderLog();
   renderExport();
-})();
+}
+
+/* =========================
+   홈 렌더
+========================= */
+function renderHome(){
+  // 날짜 라벨
+  todayLabelEl.textContent = mmddLabel(activeDate);
+
+  // 미래 이동 금지
+  const t = new Date(); t.setHours(0,0,0,0);
+  const isToday = activeDate.getTime() === t.getTime();
+  btnNext.classList.toggle("disabled", isToday);
+
+  // 버튼 선택 표시
+  const entry = getEntry(activeDate);
+  const selected = new Set(entry.muscles);
+
+  // 운동 완료(부위 하나라도 있으면 active)
+  doneBtn.classList.toggle("active", selected.size > 0);
+
+  // 부위 버튼들 색 반영
+  Array.from(muscleGrid.querySelectorAll(".muscle")).forEach(btn=>{
+    const m = btn.dataset.muscle;
+    btn.classList.toggle("selected", selected.has(m));
+  });
+
+  // 마지막 운동 몇일 전
+  lastInfo.textContent = buildLastInfoText();
+}
+
+function buildLastInfoText(){
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const lines = MUSCLES.map(m=>{
+    const last = findLastDateForMuscle(m, today);
+    if(!last) return `${m}: 기록 없음`;
+    const diff = Math.round((today.getTime() - last.getTime()) / (1000*60*60*24));
+    if(diff === 0) return `${m}: 오늘`;
+    return `${m}: ${diff}일 전`;
+  });
+
+  return lines.join(" · ");
+}
+
+function findLastDateForMuscle(muscle, upToDate){
+  // upToDate 포함해서 과거로 검색
+  const upToKey = toLocalISODate(upToDate);
+  const keys = Object.keys(data).sort(); // YYYY-MM-DD 정렬됨
+  let best = null;
+
+  for(const k of keys){
+    if(k > upToKey) continue;
+    const entry = data[k];
+    if(entry?.muscles?.includes(muscle)){
+      best = fromLocalISODate(k);
+    }
+  }
+  return best;
+}
+
+/* =========================
+   기록(2주) 렌더
+   - "오늘이 포함된 주의 전주 일요일" ~ "오늘이 포함된 주의 토요일"
+========================= */
+function startOfWeekSunday(d){
+  const x = new Date(d); x.setHours(0,0,0,0);
+  const day = x.getDay(); // 0=일
+  x.setDate(x.getDate() - day);
+  return x;
+}
+
+function renderLog(){
+  calendarEl.innerHTML = "";
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const thisWeekSun = startOfWeekSunday(today);
+  const start = new Date(thisWeekSun);
+  start.setDate(start.getDate() - 7); // 전주 일요일
+
+  // 14일
+  for(let i=0;i<14;i++){
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+
+    const entry = getEntry(d);
+    const selected = new Set(entry.muscles);
+
+    const dayBox = document.createElement("div");
+    dayBox.className = "day";
+
+    // 오늘 테두리 표시
+    if(d.getTime() === today.getTime()){
+      dayBox.classList.add("today");
+    }
+
+    const h4 = document.createElement("h4");
+    h4.textContent = mmddLabel(d);
+    dayBox.appendChild(h4);
+
+    // 슬롯은 항상 고정 순서(7개)
+    MUSCLES.forEach(m=>{
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      if(selected.has(m)){
+        slot.classList.add("filled");
+        slot.textContent = m;
+      }else{
+        slot.textContent = ""; // 빈칸 유지
+      }
+      dayBox.appendChild(slot);
+    });
+
+    calendarEl.appendChild(dayBox);
+  }
+}
+
+/* =========================
+   내보내기 렌더 + 복사
+========================= */
+function renderExport(){
+  // 날짜 오름차순 출력
+  const keys = Object.keys(data).sort();
+  const lines = keys.map(k=>{
+    const entry = data[k];
+    const muscles = (entry?.muscles || []).slice().sort((a,b)=>MUSCLES.indexOf(a)-MUSCLES.indexOf(b));
+    return `${k}: ${muscles.join(", ")}`;
+  });
+
+  exportText.textContent = lines.join("\n");
+}
+
+copyBtn.addEventListener("click", async ()=>{
+  const text = exportText.textContent || "";
+  try{
+    await navigator.clipboard.writeText(text);
+    copyBtn.textContent = "복사됨!";
+    setTimeout(()=>copyBtn.textContent="복사하기", 900);
+  }catch(e){
+    // iOS 일부 환경 fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    copyBtn.textContent = "복사됨!";
+    setTimeout(()=>copyBtn.textContent="복사하기", 900);
+  }
+});
+
+/* =========================
+   탭 전환
+========================= */
+function showPage(name){
+  Object.keys(pages).forEach(k=>{
+    pages[k].classList.toggle("active", k === name);
+  });
+  tabs.forEach(t=>{
+    t.classList.toggle("active", t.dataset.target === name);
+  });
+
+  // 탭 이동 시 갱신
+  if(name === "home") renderHome();
+  if(name === "log") renderLog();
+  if(name === "export") renderExport();
+}
+
+tabs.forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    showPage(tab.dataset.target);
+  });
+});
+
+/* =========================
+   날짜 이동(홈)
+========================= */
+btnPrev.addEventListener("click", ()=>{
+  const d = new Date(activeDate);
+  d.setDate(d.getDate() - 1);
+  activeDate = d;
+  renderHome();
+});
+
+btnNext.addEventListener("click", ()=>{
+  const d = new Date(activeDate);
+  d.setDate(d.getDate() + 1);
+  activeDate = clampToToday(d);
+  renderHome();
+});
+
+/* =========================
+   초기화
+========================= */
+function init(){
+  buildWeekdays();
+  buildMuscleButtons();
+
+  // 활성 날짜는 "오늘"
+  const t = new Date();
+  t.setHours(0,0,0,0);
+  activeDate = t;
+
+  renderHome();
+  renderLog();
+  renderExport();
+}
+
+init();
