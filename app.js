@@ -1,143 +1,131 @@
 const muscles = ["가슴","등","어깨","이두","삼두","코어","하체"];
+let selectedDate;
+let records = {};
 
-let selectedDate = getToday();
-let records = JSON.parse(localStorage.getItem("records") || "{}");
-
-/* ------------------ 날짜 유틸 ------------------ */
-function getToday() {
-  const d = new Date();
+/* 날짜 유틸 */
+function pad(n){return n.toString().padStart(2,"0");}
+function today(){
+  const d=new Date();
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
-function pad(n){ return n.toString().padStart(2,"0"); }
-
-/* ------------------ 홈 ------------------ */
-function renderHome() {
-  document.getElementById("todayLabel").textContent = formatDate(selectedDate);
-
-  document.querySelectorAll(".muscle").forEach(btn=>{
-    const m = btn.dataset.muscle;
-    btn.classList.toggle(
-      "selected",
-      records[selectedDate]?.includes(m)
-    );
-  });
-
-  updateDoneBtn();
-  updateLastInfo();
+function addDays(date,n){
+  const d=new Date(date+"T12:00:00");
+  d.setDate(d.getDate()+n);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function weekStart(date){
+  const d=new Date(date+"T12:00:00");
+  d.setDate(d.getDate()-d.getDay()-7);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function fmt(date){
+  const [,m,d]=date.split("-");
+  return `${m}.${d}`;
 }
 
-function toggleMuscle(muscle){
-  if(!records[selectedDate]) records[selectedDate]=[];
+/* 저장 */
+function load(){
+  records=JSON.parse(localStorage.getItem("records")||"{}");
+}
+function save(){
+  localStorage.setItem("records",JSON.stringify(records));
+}
 
-  if(records[selectedDate].includes(muscle)){
-    records[selectedDate] = records[selectedDate].filter(m=>m!==muscle);
+/* 홈 */
+function toggleMuscle(m){
+  if(!records[selectedDate]) records[selectedDate]=[];
+  if(records[selectedDate].includes(m)){
+    records[selectedDate]=records[selectedDate].filter(x=>x!==m);
     if(records[selectedDate].length===0) delete records[selectedDate];
   }else{
-    records[selectedDate].push(muscle);
+    records[selectedDate].push(m);
   }
-
-  save();
-  renderHome();
-  renderCalendar();
-  renderExport();
+  save(); renderAll();
 }
 
-function updateDoneBtn(){
-  const btn = document.querySelector(".done-btn");
+function renderHome(){
+  document.getElementById("todayLabel").textContent=fmt(selectedDate);
+
+  document.querySelectorAll(".muscle").forEach(b=>{
+    b.classList.toggle("selected",records[selectedDate]?.includes(b.dataset.muscle));
+  });
+
+  const done=document.querySelector(".done-btn");
   if(records[selectedDate]?.length){
-    btn.style.background="#000";
-    btn.style.color="#fff";
+    done.style.background="#000";
   }else{
-    btn.style.background="#aaa";
-    btn.style.color="#fff";
+    done.style.background="#aaa";
   }
+
+  const info=muscles.map(m=>{
+    let last=null;
+    Object.keys(records).forEach(d=>{
+      if(records[d]?.includes(m)) last=d;
+    });
+    if(!last) return `${m}: 기록 없음`;
+    const diff=(new Date(selectedDate)-new Date(last+"T12:00:00"))/86400000|0;
+    return `${m}: ${diff}일 전`;
+  });
+  document.querySelector(".last-info").textContent=info.join(" · ");
+
+  const next=document.getElementById("nextBtn");
+  next.disabled=selectedDate>=today();
+  next.classList.toggle("disabled",selectedDate>=today());
 }
 
-/* ------------------ 기록 ------------------ */
+/* 기록 */
 function renderCalendar(){
-  const cal = document.querySelector(".calendar");
+  const cal=document.querySelector(".calendar");
   cal.innerHTML="";
+  const start=weekStart(selectedDate);
 
-  const start = getWeekStart(selectedDate);
   for(let i=0;i<14;i++){
-    const date = addDays(start,i);
-    const day = document.createElement("div");
-    day.className="day";
-    if(date===selectedDate) day.classList.add("today");
+    const d=addDays(start,i);
+    const box=document.createElement("div");
+    box.className="day"+(d===today()?" today":"");
 
-    const h4 = document.createElement("h4");
-    h4.textContent = formatDate(date);
-    day.appendChild(h4);
+    const h=document.createElement("h4");
+    h.textContent=fmt(d);
+    box.appendChild(h);
 
     muscles.forEach(m=>{
-      const s = document.createElement("div");
+      const s=document.createElement("div");
       s.className="slot";
-      if(records[date]?.includes(m)){
+      if(records[d]?.includes(m)){
         s.classList.add("filled");
         s.textContent=m;
       }
-      day.appendChild(s);
+      box.appendChild(s);
     });
-
-    cal.appendChild(day);
+    cal.appendChild(box);
   }
 }
 
-/* ------------------ 내보내기 ------------------ */
+/* 내보내기 */
 function renderExport(){
-  const box = document.querySelector("pre");
-  const lines = Object.keys(records)
-    .sort()
-    .map(d => `${d}: ${records[d].join(", ")}`);
-  box.textContent = lines.join("\n");
+  const pre=document.querySelector("pre");
+  const lines=Object.keys(records).sort().map(d=>`${d}: ${records[d].join(", ")}`);
+  pre.textContent=lines.join("\n");
 }
 
 function copyExport(){
   navigator.clipboard.writeText(document.querySelector("pre").textContent);
 }
 
-/* ------------------ 날짜 이동 ------------------ */
-function moveDate(diff){
-  const today = getToday();
-  const next = addDays(selectedDate,diff);
-  if(next>today) return;
+/* 탭 */
+function setTab(t){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(t).classList.add("active");
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelector(`.tab[data-tab="${t}"]`).classList.add("active");
+}
+
+/* 날짜 이동 */
+function move(n){
+  const next=addDays(selectedDate,n);
+  if(next>today()) return;
   selectedDate=next;
   renderAll();
-}
-
-/* ------------------ 헬퍼 ------------------ */
-function addDays(date,n){
-  const d = new Date(date+"T12:00:00");
-  d.setDate(d.getDate()+n);
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-
-function getWeekStart(date){
-  const d = new Date(date+"T12:00:00");
-  d.setDate(d.getDate()-d.getDay()-7);
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-
-function formatDate(d){
-  const [y,m,dd]=d.split("-");
-  return `${m}.${dd}`;
-}
-
-function updateLastInfo(){
-  const info = muscles.map(m=>{
-    let last=null;
-    Object.keys(records).forEach(d=>{
-      if(records[d].includes(m)) last=d;
-    });
-    if(!last) return `${m}: 기록 없음`;
-    const diff = Math.floor((new Date(selectedDate)-new Date(last+"T12:00:00"))/86400000);
-    return `${m}: ${diff}일 전`;
-  });
-  document.querySelector(".last-info").textContent=info.join(" · ");
-}
-
-function save(){
-  localStorage.setItem("records",JSON.stringify(records));
 }
 
 function renderAll(){
@@ -146,4 +134,23 @@ function renderAll(){
   renderExport();
 }
 
-renderAll();
+/* 초기화 */
+document.addEventListener("DOMContentLoaded",()=>{
+  load();
+  selectedDate=today();
+
+  document.querySelectorAll(".muscle").forEach(b=>{
+    b.onclick=()=>toggleMuscle(b.dataset.muscle);
+  });
+
+  document.getElementById("prevBtn").onclick=()=>move(-1);
+  document.getElementById("nextBtn").onclick=()=>move(1);
+  document.getElementById("copyBtn").onclick=copyExport;
+
+  document.querySelectorAll(".tab").forEach(b=>{
+    b.onclick=()=>setTab(b.dataset.tab);
+  });
+
+  renderAll();
+});
+
