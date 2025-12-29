@@ -1,72 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MGymLog</title>
 
+  <link rel="stylesheet" href="styles.css" />
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
-  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <!-- iOS 홈화면 아이콘(네 파일명에 맞춰 필요시 수정) -->
+  <link rel="apple-touch-icon" href="icon-192.png" />
 </head>
-<body>
 
+<body>
   <header class="topbar">
-    <h1>MGymLog</h1>
+    <div class="title">MGymLog</div>
   </header>
 
   <main>
     <!-- 홈 -->
-    <section id="home" class="page active">
+    <section id="pageHome" class="page active">
       <div class="date-row">
-        <button id="prevBtn" class="nav-btn" aria-label="전날">←</button>
-        <div id="todayLabel">--.--</div>
-        <button id="nextBtn" class="nav-btn" aria-label="다음날">→</button>
+        <button id="btnPrevDay" class="nav-btn" aria-label="이전 날짜">←</button>
+        <div id="todayLabel" class="date-label">--.--</div>
+        <button id="btnNextDay" class="nav-btn" aria-label="다음 날짜">→</button>
       </div>
 
-      <button class="done-btn" id="doneBtn">운동 완료</button>
+      <button id="doneBtn" class="done-btn" type="button">운동 완료</button>
 
-      <div class="muscle-grid">
-        <button class="muscle" data-muscle="가슴">가슴</button>
-        <button class="muscle" data-muscle="등">등</button>
-        <button class="muscle" data-muscle="어깨">어깨</button>
-        <button class="muscle" data-muscle="이두">이두</button>
-        <button class="muscle" data-muscle="삼두">삼두</button>
-        <button class="muscle" data-muscle="코어">코어</button>
-        <button class="muscle" data-muscle="하체">하체</button>
-      </div>
+      <div class="muscle-grid" id="muscleGrid"></div>
 
-      <div class="last-info"></div>
+      <div class="last-info" id="lastInfo"></div>
     </section>
 
     <!-- 기록 -->
-    <section id="record" class="page">
-      <div class="weekdays">
-        <div>일</div><div>월</div><div>화</div><div>수</div>
-        <div>목</div><div>금</div><div>토</div>
-      </div>
-      <div class="calendar"></div>
+    <section id="pageLog" class="page">
+      <div class="weekdays" id="weekdaysRow"></div>
+      <div class="calendar" id="calendarGrid"></div>
     </section>
 
     <!-- 내보내기 -->
-    <section id="export" class="page">
-      <button id="copyBtn" class="copy-btn">복사하기</button>
-      <pre></pre>
+    <section id="pageExport" class="page">
+      <button id="copyBtn" class="copy-btn" type="button">복사하기</button>
+      <div class="export-hint">GPT 분석용으로 복사해서 붙여넣으세요.</div>
+      <pre id="exportText"></pre>
     </section>
   </main>
 
-  <nav class="bottom-tabs">
-    <button class="tab active" data-tab="home">홈</button>
-    <button class="tab" data-tab="record">기록</button>
-    <button class="tab" data-tab="export">내보내기</button>
+  <nav class="bottom-tabs" aria-label="탭">
+    <button class="tab active" data-target="home" type="button">홈</button>
+    <button class="tab" data-target="log" type="button">기록</button>
+    <button class="tab" data-target="export" type="button">내보내기</button>
   </nav>
 
-  <!-- ✅ 반드시 defer 유지 -->
-  <script src="script.js" defer></script>
+  <script src="app.js"></script>
 </body>
 </html>
-
