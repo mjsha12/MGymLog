@@ -9,18 +9,22 @@ body{
   color:#111;
 }
 
-/* 상단 */
+/* 버튼 기본 파란색 제거(iOS) */
+button{
+  color:#000;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .topbar{
   padding:14px 16px;
   border-bottom:1px solid #eee;
 }
 .topbar h1{
   margin:0;
-  font-size:26px;
+  font-size:34px;
   font-weight:900;
 }
 
-/* 메인 */
 main{
   padding:16px;
   padding-bottom:calc(90px + env(safe-area-inset-bottom));
@@ -45,32 +49,36 @@ main{
   background:#fff;
   border-radius:12px;
   font-size:18px;
+  font-weight:900;
+  color:#000;
 }
+
 .nav-btn.disabled{
   opacity:.3;
 }
 
 #todayLabel{
-  font-size:18px;
-  font-weight:800;
+  font-size:20px;
+  font-weight:900;
 }
 
-/* 홈 */
+/* 홈 - 운동 완료 */
 .done-btn{
   width:100%;
   height:88px;
-  border-radius:20px;
-  border:none;
-  background:#aaa;
+  background:#aaa; /* 기록 있으면 JS에서 #000으로 바뀜 */
   color:#fff;
+  border-radius:20px;
   font-size:20px;
   font-weight:900;
+  border:none;
   margin-bottom:16px;
 }
 
+/* 부위 버튼 */
 .muscle-grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(3, 1fr);
   gap:12px;
 }
 
@@ -81,6 +89,7 @@ main{
   background:#fff;
   font-size:16px;
   font-weight:900;
+  color:#000; /* ✅ 파란색 제거 */
 }
 
 .muscle.selected{
@@ -98,17 +107,17 @@ main{
 /* 기록 */
 .weekdays{
   display:grid;
-  grid-template-columns:repeat(7,1fr);
+  grid-template-columns:repeat(7, minmax(0,1fr));
   font-size:12px;
   text-align:center;
   margin-bottom:6px;
   color:#888;
-  font-weight:700;
+  font-weight:800;
 }
 
 .calendar{
   display:grid;
-  grid-template-columns:repeat(7,1fr);
+  grid-template-columns:repeat(7, minmax(0,1fr));
   gap:6px;
 }
 
@@ -120,6 +129,7 @@ main{
   background:#fff;
 }
 
+/* 오늘 표시(얇지 않게, 근데 너무 두껍진 않게) */
 .day.today{
   border:2px solid #000;
 }
@@ -127,10 +137,10 @@ main{
 .day h4{
   margin:0 0 6px;
   font-size:12px;
-  font-weight:800;
+  font-weight:900;
+  color:#111;
 }
 
-/* 슬롯 */
 .slot{
   height:16px;
   border:1px solid #000;
@@ -140,7 +150,11 @@ main{
   align-items:center;
   justify-content:center;
   font-size:10px;
-  font-weight:800;
+  font-weight:900;
+  line-height:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   background:#fff;
   color:#000;
 }
@@ -159,6 +173,7 @@ main{
   background:#fff;
   font-size:16px;
   font-weight:900;
+  color:#000; /* ✅ 파란색 제거 */
 }
 
 pre{
@@ -170,7 +185,7 @@ pre{
   white-space:pre-wrap;
 }
 
-/* 하단 탭 */
+/* 하단 탭바 */
 .bottom-tabs{
   position:fixed;
   bottom:0;
@@ -189,6 +204,7 @@ pre{
   background:none;
   font-size:14px;
   color:#aaa;
+  font-weight:700;
 }
 
 .bottom-tabs .tab.active{
